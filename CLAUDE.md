@@ -79,7 +79,8 @@ Eintrag: `{"datum":"JJJJ-MM-TT","typ":"start|verlauf|abschluss","titel":"…","t
 - Alternativ kommt der Text aus dem Formular „Neues Projekt“ der Seite.
 - OneDrive: in der Wurzel den Ordner `##_Straße_Hausnummer_PLZ_Ort` anlegen, darin den Jahresordner mit 12 Monatsordnern. IDs ins Projekt schreiben.
 - `eigenkapital`: fester Betrag vom Nutzer. Fehlt der Wert, `null` lassen. Die Seite rechnet dann Plan-Gesamtkosten minus `plan.darlehen`.
-- Alternativ `ekRegel: {"basis":16000,"plusKnk":true,"knkVollstaendig":false}`: Eigenkapital = Basis plus Kaufnebenkosten, solange `knkVollstaendig` false ist laut Plan, danach laut Rechnungen. Sind Notar, Grundbuch, Makler und Grunderwerbsteuer erfasst, beim Nutzer nachfragen und dann `knkVollstaendig` auf true setzen.
+- Alternativ `ekRegel: {"basis":16000,"knkTeile":{"notar":true,"makler":true,"grest":true},"knkVollstaendig":false}`: Eigenkapital = Basis plus die angehakten Teile der Kaufnebenkosten (notar = Notar und Grundbuch, makler = Makler, grest = Grunderwerbsteuer). Solange `knkVollstaendig` false ist, zählen die Planwerte, danach die Rechnungen. Sind Notar, Grundbuch, Makler und Grunderwerbsteuer erfasst, beim Nutzer nachfragen und dann `knkVollstaendig` auf true setzen. Die Nutzer können das auch selbst über „Eckdaten bearbeiten“ einstellen.
+- Planpositionen der Kaufnebenkosten bekommen `teil` (notar, makler, grest). Kostenpositionen der Kategorie `knk` bekommen `knkTeil` mit demselben Wert. Grundbuchkosten zählen zu `notar`.
 
 ## Projektabschluss
 

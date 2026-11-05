@@ -356,6 +356,9 @@ a.addcard:hover{border-color:var(--accent)}
 .btn.sm{padding:7px 12px;font-size:13px}
 .modal-box ol{margin:0;padding-left:20px;color:var(--ink-2);font-size:14px;display:flex;flex-direction:column;gap:4px}
 .form-err{color:var(--bad);font-size:13px;font-weight:600;min-height:18px}
+.ekset{border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin:0;display:flex;flex-direction:column;gap:8px}
+.ekset legend{font-size:13px;font-weight:600;color:var(--ink-2);padding:0 6px}
+.ekset .chk{display:flex;gap:8px;align-items:baseline;font-size:14px;color:var(--ink)}
 .linkbtn{background:none;border:0;padding:0;color:var(--accent);font-size:13px;font-weight:600;cursor:pointer;align-self:flex-start}
 @media (max-width:520px){.phead-r{flex-direction:row;align-items:center}}
 .modal-box p{margin:0;color:var(--ink-2);font-size:14px}
@@ -430,6 +433,13 @@ const sgn = (v,f) => (v>0.004?'+':v<-0.004?'−':'±')+f(Math.abs(v));
 const dl = (v,upGood,f=e0) => { const cls = Math.abs(v)<0.5 ? '' : ((v>0)===upGood ? 'pos':'neg'); return `<span class="delta ${cls}">${sgn(v,f)}</span>`; };
 const slug = s => s.toLowerCase().replace(/ä/g,'ae').replace(/ö/g,'oe').replace(/ü/g,'ue').replace(/ß/g,'ss').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
 
+const KNK_TEILE = [['notar','Notar und Grundbuch'], ['makler','Makler'], ['grest','Grunderwerbsteuer']];
+function knkTeil(x){
+  if(x.teil) return x.teil;
+  if(x.knkTeil) return x.knkTeil;
+  const t = [x.name, x.text, x.lieferant].filter(Boolean).join(' ');
+  return /makler|provision/i.test(t) ? 'makler' : /grunderwerb/i.test(t) ? 'grest' : /notar|grundbuch|amtsgericht/i.test(t) ? 'notar' : null;
+}
 function calc(p){
   const plan = {kaufpreis:0,knk:0,finanzierung:0,renovierung:0,weiteres:0};
   p.plan.positionen.forEach(x => plan[x.bucket] = r2(plan[x.bucket]+x.betrag));
@@ -445,13 +455,19 @@ function calc(p){
   const planGewinn = r2(vkPlan - planSum);
   const done = p.status === 'abgeschlossen';
   const dauer = Math.max(0, monthsBetween(pd(p.ankauf), done ? pd(p.verkauf.datum) : new Date()));
+  const planKnkTeil = {notar:0, makler:0, grest:0}, istKnkTeil = {notar:0, makler:0, grest:0};
+  p.plan.positionen.filter(x => x.bucket === 'knk').forEach(x => { const t = knkTeil(x); if(t) planKnkTeil[t] = r2(planKnkTeil[t] + x.betrag); });
+  p.kosten.filter(x => x.bucket === 'knk').forEach(x => { const t = knkTeil(x); if(t) istKnkTeil[t] = r2(istKnkTeil[t] + x.betrag); });
   const rg = p.ekRegel;
+  const teile = rg ? (rg.knkTeile || (rg.plusKnk ? {notar:true, makler:true, grest:true} : {})) : {};
+  const quelle = rg && rg.knkVollstaendig ? istKnkTeil : planKnkTeil;
   const ekAuto = !rg && p.eigenkapital == null;
-  const ek0 = rg ? r2(rg.basis + (rg.plusKnk ? (rg.knkVollstaendig ? ist.knk : plan.knk) : 0))
+  const ek0 = rg ? r2((rg.basis || 0) + KNK_TEILE.reduce((s2, [t]) => s2 + (teile[t] ? quelle[t] : 0), 0))
             : ekAuto ? r2(planSum - (p.plan.darlehen || 0)) : p.eigenkapital;
-  const ekText = rg ? `${e0(rg.basis)} plus Kaufnebenkosten ${rg.knkVollstaendig ? 'laut Rechnungen' : 'laut Plan, bis alle Rechnungen erfasst sind'}`
+  const gewaehlt = KNK_TEILE.filter(([t]) => teile[t]).map(([, l]) => l);
+  const ekText = rg ? (gewaehlt.length ? `${e0(rg.basis || 0)} plus ${gewaehlt.join(', ').replace(/, ([^,]*)$/, ' und $1')} ${rg.knkVollstaendig ? 'laut Rechnungen' : 'laut Plan, bis alle Rechnungen erfasst sind'}` : `${e0(rg.basis || 0)}, ohne Kaufnebenkosten`)
             : ekAuto ? 'vorläufig berechnet: Plan-Gesamtkosten minus Darlehen' : '';
-  const c = {plan, ist, planSum, istSum, vkPlan, planGewinn, planMarge: planGewinn/planSum, ek0, ekAuto, ekText,
+  const c = {plan, ist, planSum, istSum, vkPlan, planGewinn, planMarge: planGewinn/planSum, ek0, ekAuto, ekText, planKnkTeil, istKnkTeil, ekTeile: teile,
     planEk: planGewinn/ek0, planEkPa: planGewinn/ek0*12/p.plan.dauerMonate,
     dauer, mat:r2(mat), arb:r2(arb), proxy:r2(proxy)};
   c.szen = Object.fromEntries(Object.entries(p.plan.verkauf).map(([k,v]) => { const g = r2(v.preis-planSum); return [k,{...v, gewinn:g, marge:g/planSum}]; }));
@@ -1046,7 +1062,7 @@ function tokenDialog(pid){
     <button class="btn" type="button" data-act="token-save" data-p="${pid}">Schlüssel speichern</button>`, true);
 }
 function editDialog(p){
-  const rg = p.ekRegel;
+  const rg = p.ekRegel, ec = calc(p);
   const f = (id, label, val, extra) => `<div class="fld"><label for="e-${id}">${label}</label><div class="inp"><input id="e-${id}" ${extra||'type="text"'} value="${esc(val ?? '')}" autocomplete="off">${''}</div></div>`;
   const num = v => v == null ? '' : nf(v);
   openModal('Eckdaten bearbeiten', `
@@ -1065,11 +1081,14 @@ function editDialog(p){
         ${f('heizung','Heizung',p.heizung)}
         <div class="fld"><label for="e-phase">Status</label><div class="inp"><select id="e-phase">${PHASEN.map(x=>`<option ${x===p.phase?'selected':''}>${x}</option>`).join('')}</select></div></div>
         ${f('ankauf','Ankauf (Beurkundung) *',p.ankauf,'type="date"')}
-        ${rg ? f('ekbasis','Eigenkapital ohne Kaufnebenkosten in €',num(rg.basis),'type="text" inputmode="decimal"') : f('ek','Eigenkapital in €',num(p.eigenkapital),'type="text" inputmode="decimal"')}
+        ${f('ekbasis','Eigenkapital ohne Kaufnebenkosten in €',num(rg ? rg.basis : p.eigenkapital),'type="text" inputmode="decimal"')}
         ${f('vkdatum','Verkauf (Beurkundung)',p.verkauf && p.verkauf.datum,'type="date"')}
         ${f('vkpreis','Verkaufspreis in €',p.verkauf ? num(p.verkauf.preis) : '','type="text" inputmode="decimal"')}
       </div>
-      ${rg ? `<label class="chk" style="display:flex;gap:8px;font-size:14px;color:var(--ink-2)"><input type="checkbox" id="e-knkist" ${rg.knkVollstaendig?'checked':''}> Alle Kaufnebenkosten sind als Rechnung erfasst. Eigenkapital mit den tatsächlichen Kaufnebenkosten rechnen.</label>` : ''}
+      <fieldset class="ekset"><legend>Diese Kaufnebenkosten zählen zum Eigenkapital</legend>
+        ${KNK_TEILE.map(([t, l]) => `<label class="chk"><input type="checkbox" id="e-ek-${t}" ${ec.ekTeile[t] ? 'checked' : ''}> ${l} <span class="muted">Plan ${e0(ec.planKnkTeil[t])}${ec.istKnkTeil[t] ? ', erfasst '+e0(ec.istKnkTeil[t]) : ''}</span></label>`).join('')}
+        <label class="chk"><input type="checkbox" id="e-knkist" ${rg && rg.knkVollstaendig ? 'checked' : ''}> Alle Kaufnebenkosten sind als Rechnung erfasst. Mit den tatsächlichen Beträgen rechnen.</label>
+      </fieldset>
       <p class="hint" style="margin:0">Verkaufsdatum und Verkaufspreis nur beim Status „Abgeschlossen“ ausfüllen. Planwerte, Rechnungen und Timeline ändert ihr weiter über den Claude-Chat.</p>
       <div class="form-err" id="edit-err"></div>
       <button class="btn" type="submit">${ghToken() ? 'Speichern' : 'Änderungen für Claude kopieren'}</button>
@@ -1087,7 +1106,7 @@ async function submitEdit(form){
   if(!g('ort')) fehler.push('Ort fehlt.');
   if(!(n('wohnflaeche') > 0)) fehler.push('Wohnfläche fehlt.');
   if(!g('ankauf')) fehler.push('Ankaufsdatum fehlt.');
-  ['zimmer','baujahr','ek','ekbasis','vkpreis'].forEach(id => { if(Number.isNaN(n(id))) fehler.push('Bitte bei '+id+' eine Zahl eintragen.'); });
+  ['zimmer','baujahr','ekbasis','vkpreis'].forEach(id => { if(Number.isNaN(n(id))) fehler.push('Bitte bei '+id+' eine Zahl eintragen.'); });
   if(done && (!g('vkdatum') || !(n('vkpreis') > 0))) fehler.push('Für „Abgeschlossen“ bitte Verkaufsdatum und Verkaufspreis eintragen.');
   if(fehler.length){ err.textContent = fehler.join(' '); return; }
   if(!ghToken()){
@@ -1100,9 +1119,10 @@ async function submitEdit(form){
     cmp('Wohnfläche m²', zahl(alt.wohnflaeche), zahl(n('wohnflaeche'))); cmp('Zimmer', zahl(alt.zimmer), zahl(n('zimmer')));
     cmp('Baujahr', alt.baujahr ?? '', n('baujahr') ?? ''); cmp('Energieklasse', alt.energie, g('energie')); cmp('Heizung', alt.heizung, g('heizung'));
     cmp('Status', alt.phase, phase); cmp('Ankauf', alt.ankauf ? fd(alt.ankauf) : '', g('ankauf') ? fd(g('ankauf')) : '');
-    if(rg){ cmp('Eigenkapital ohne Kaufnebenkosten €', zahl(rg.basis), zahl(n('ekbasis')));
-      const cb = document.getElementById('e-knkist'); if(cb) cmp('Alle Kaufnebenkosten erfasst', rg.knkVollstaendig ? 'ja' : 'nein', cb.checked ? 'ja' : 'nein'); }
-    else cmp('Eigenkapital €', zahl(alt.eigenkapital), zahl(n('ek')));
+    const ac = calc(alt), jn = b => b ? 'ja' : 'nein';
+    cmp('Eigenkapital ohne Kaufnebenkosten €', zahl(rg ? rg.basis : alt.eigenkapital), zahl(n('ekbasis')));
+    KNK_TEILE.forEach(([t, l]) => cmp('Eigenkapital enthält '+l, jn(ac.ekTeile[t]), jn(document.getElementById('e-ek-'+t).checked)));
+    cmp('Alle Kaufnebenkosten erfasst', jn(rg && rg.knkVollstaendig), jn(document.getElementById('e-knkist').checked));
     cmp('Verkauf Datum', alt.verkauf ? fd(alt.verkauf.datum) : '', g('vkdatum') ? fd(g('vkdatum')) : '');
     cmp('Verkaufspreis €', alt.verkauf ? zahl(alt.verkauf.preis) : '', zahl(n('vkpreis')));
     if(!zeilen.length){ err.textContent = 'Es wurde nichts geändert.'; return; }
@@ -1118,8 +1138,9 @@ async function submitEdit(form){
       o.baujahr = n('baujahr'); o.energie = g('energie'); o.heizung = g('heizung'); o.ankauf = g('ankauf');
       o.phase = phase; o.status = done ? 'abgeschlossen' : 'laufend';
       o.verkauf = (g('vkdatum') && n('vkpreis') > 0) ? {datum:g('vkdatum'), preis:n('vkpreis')} : null;
-      if(o.ekRegel){ if(n('ekbasis') != null) o.ekRegel.basis = n('ekbasis'); const cb = document.getElementById('e-knkist'); if(cb) o.ekRegel.knkVollstaendig = cb.checked; }
-      else o.eigenkapital = n('ek');
+      const tl = Object.fromEntries(KNK_TEILE.map(([t]) => [t, document.getElementById('e-ek-'+t).checked]));
+      if(n('ekbasis') == null && !Object.values(tl).some(Boolean)){ delete o.ekRegel; o.eigenkapital = null; }
+      else { o.ekRegel = {basis: n('ekbasis') || 0, knkTeile: tl, knkVollstaendig: document.getElementById('e-knkist').checked}; o.eigenkapital = null; }
     });
     const i = PROJEKTE.findIndex(x => x.id === neu.id); PROJEKTE[i] = neu;
     setFoot(); render();
