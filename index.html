@@ -438,9 +438,13 @@ function calc(p){
   const planGewinn = r2(vkPlan - planSum);
   const done = p.status === 'abgeschlossen';
   const dauer = Math.max(0, monthsBetween(pd(p.ankauf), done ? pd(p.verkauf.datum) : new Date()));
-  const ekAuto = p.eigenkapital == null;
-  const ek0 = ekAuto ? r2(planSum - (p.plan.darlehen || 0)) : p.eigenkapital;
-  const c = {plan, ist, planSum, istSum, vkPlan, planGewinn, planMarge: planGewinn/planSum, ek0, ekAuto,
+  const rg = p.ekRegel;
+  const ekAuto = !rg && p.eigenkapital == null;
+  const ek0 = rg ? r2(rg.basis + (rg.plusKnk ? (rg.knkVollstaendig ? ist.knk : plan.knk) : 0))
+            : ekAuto ? r2(planSum - (p.plan.darlehen || 0)) : p.eigenkapital;
+  const ekText = rg ? `${e0(rg.basis)} plus Kaufnebenkosten ${rg.knkVollstaendig ? 'laut Rechnungen' : 'laut Plan, bis alle Rechnungen erfasst sind'}`
+            : ekAuto ? 'vorläufig berechnet: Plan-Gesamtkosten minus Darlehen' : '';
+  const c = {plan, ist, planSum, istSum, vkPlan, planGewinn, planMarge: planGewinn/planSum, ek0, ekAuto, ekText,
     planEk: planGewinn/ek0, planEkPa: planGewinn/ek0*12/p.plan.dauerMonate,
     dauer, mat:r2(mat), arb:r2(arb), proxy:r2(proxy)};
   c.szen = Object.fromEntries(Object.entries(p.plan.verkauf).map(([k,v]) => { const g = r2(v.preis-planSum); return [k,{...v, gewinn:g, marge:g/planSum}]; }));
@@ -781,7 +785,7 @@ function renderGewinn(p,c){
     <div class="tablewrap"><table class="gw"><thead><tr>${head.map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>${rows}</tbody></table></div>
   </div>
   ${szen}
-  <p class="foot">Gewinn vor Steuern = Verkaufspreis minus Kaufpreis, Kaufnebenkosten, Finanzierungskosten, Renovierungskosten und weitere Kosten. Finanzierungskosten sind Zinsen und Bearbeitungsgebühr, ohne Tilgung. Marge = Gewinn vor Steuern geteilt durch Summe Kosten. EK-Rendite = Gewinn vor Steuern geteilt durch eingesetztes Eigenkapital, p.a. linear auf 12 Monate hochgerechnet${c.ekAuto?' (Eigenkapital vorläufig berechnet: Plan-Gesamtkosten minus Darlehen)':''}. Projektdauer = Beurkundung Ankauf bis Beurkundung Verkauf. Alle Beträge brutto.</p>`;
+  <p class="foot">Gewinn vor Steuern = Verkaufspreis minus Kaufpreis, Kaufnebenkosten, Finanzierungskosten, Renovierungskosten und weitere Kosten. Finanzierungskosten sind Zinsen und Bearbeitungsgebühr, ohne Tilgung. Marge = Gewinn vor Steuern geteilt durch Summe Kosten. EK-Rendite = Gewinn vor Steuern geteilt durch eingesetztes Eigenkapital, p.a. linear auf 12 Monate hochgerechnet${c.ekText?' (Eigenkapital: '+c.ekText+')':''}. Projektdauer = Beurkundung Ankauf bis Beurkundung Verkauf. Alle Beträge brutto.</p>`;
 }
 
 function renderBericht(p,c){

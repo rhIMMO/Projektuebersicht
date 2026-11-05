@@ -38,7 +38,7 @@ Sprache: Deutsch. Keine Semikolons und keine Gedankenstriche als Satzzeichen. Ku
 | `kaufpreis` | Kaufpreis |
 | `knk` | Kaufnebenkosten: Notar, Grundbuch, Makler beim Ankauf, Grunderwerbsteuer |
 | `finanzierung` | Nur Zinsen und Bearbeitungs- oder Bereitstellungsgebühr. Keine Tilgung. |
-| `renovierung` | Renovierung mit Aufteilung `split: {material, arbeit}`. Weist die Rechnung beides nicht getrennt aus, beim Nutzer nachfragen, welcher Proxy gilt, und `proxy: true` setzen. |
+| `renovierung` | Renovierung mit Aufteilung `split: {material, arbeit}`. Weist die Rechnung beides nicht getrennt aus, `proxy: true` setzen. Bei pauschalen Abschlägen des Generalunternehmers 25 % Material und 75 % Arbeit vorschlagen, aber immer nachfragen. |
 | `weiteres` | Alles andere: Hausgeld, Strom, Vermarktung, Homestaging, Fotograf, Inserate, Fahrten, Parken, Makler beim Verkauf |
 
 Alle Beträge brutto. Eigenleistung nur als Text in der Timeline, nie als Kosten.
@@ -75,7 +75,8 @@ Eintrag: `{"datum":"JJJJ-MM-TT","typ":"start|verlauf|abschluss","titel":"…","t
 - Planwerte aus der Fix-and-Flip-Excel, Blatt „Kalkulation“: D16 Kaufpreis, D17 Wohnfläche, C18 Notar und Grundbuch, C19 Makler, C20 Grunderwerbsteuer, C25 Zinsmonate, C26 Finanzierungsanteil, C27 Zins, C28 Bearbeitungsgebühr, J7 Renovierung je m², H8 Puffer, H15 Projektdauer, I16 Hausgeld, I17 Strom und Heizung, O15 Homestaging, O9 und O10 Verkaufspreis je m² gering und hoch, C5 Energieklasse, C6 Heizung, E5 Baujahr. Positionen und Werte genau wie in der Excel.
 - Alternativ kommt der Text aus dem Formular „Neues Projekt“ der Seite.
 - OneDrive: in der Wurzel den Ordner `##_Straße_Hausnummer_PLZ_Ort` anlegen, darin den Jahresordner mit 12 Monatsordnern. IDs ins Projekt schreiben.
-- `eigenkapital`: vom Nutzer. Fehlt der Wert, `null` lassen. Die Seite rechnet dann Plan-Gesamtkosten minus `plan.darlehen`.
+- `eigenkapital`: fester Betrag vom Nutzer. Fehlt der Wert, `null` lassen. Die Seite rechnet dann Plan-Gesamtkosten minus `plan.darlehen`.
+- Alternativ `ekRegel: {"basis":16000,"plusKnk":true,"knkVollstaendig":false}`: Eigenkapital = Basis plus Kaufnebenkosten, solange `knkVollstaendig` false ist laut Plan, danach laut Rechnungen. Sind Notar, Grundbuch, Makler und Grunderwerbsteuer erfasst, beim Nutzer nachfragen und dann `knkVollstaendig` auf true setzen.
 
 ## Projektabschluss
 
