@@ -51,7 +51,11 @@ Gemeinsames OneDrive-Konto über den Microsoft-365-Connector. Wurzelordner `11_P
 2. Je Datei ermitteln: Rechnungsdatum, Lieferant, Bruttobetrag, Projekt (meist über die Objektadresse), Kategorie, bei Renovierung Material und Arbeit.
 3. Vorschlag als Tabelle zeigen, mit Zielordner und neuem Dateinamen. Erst nach Bestätigung handeln.
 4. Nachfragen statt raten, wenn: kein Rechnungsdatum, Projekt unklar, mehrere Projekte auf einer Rechnung, Betrag unleserlich, Gutschrift, Abschlag mit unklarer Verrechnung.
-5. Dateiname: `JJJJ-MM-TT_<Projekt>_<Lieferant>.pdf`, zum Beispiel `2026-10-02_Musterstrasse-1_Maklerbuero.pdf`. Ohne Umlaute und Leerzeichen.
+5. Dateiname immer mit dem Werkzeug bilden, nie von Hand: `python3 werkzeuge/daten.py dateiname <JJJJ-MM-TT> <bucket> "<Inhalt>" [endung]`. Ergebnis: `JJJJMMTT_Kategorie_Inhalt.pdf`.
+   - Datum = Rechnungsdatum. Kategorie = einer der fünf Buckets (Kaufpreis, Kaufnebenkosten, Finanzierung, Renovierung, Weiteres).
+   - Inhalt = was bezahlt wurde, 1 bis 4 Wörter, ohne Lieferant und ohne Projekt (das Projekt steckt im Ordner). Beispiele: `Notar Kaufvertrag`, `Grunderwerbsteuer`, `Zinsen Oktober`, `Parkett Eiche`, `GU Abschlag 1`, `GU Schlussrechnung`, `Hausgeld November`.
+   - Gutschriften beginnen mit `Gutschrift`. Gibt es den Namen im Monatsordner schon, `_2`, `_3` anhängen.
+   - Beispiel: `20261030_Renovierung_Parkett-Eiche.pdf`
 6. Datei in `<Projektordner>/<JJJJ>/<MM_Monat>` verschieben. Der Monat richtet sich nach dem Rechnungsdatum. Fehlt der Jahresordner, ihn mit `01_Januar` bis `12_Dezember` anlegen und die IDs ins Projekt schreiben.
 7. Kostenposition anhängen: `{"id":"k001","datum":"JJJJ-MM-TT","lieferant":"…","text":"…","bucket":"…","betrag":0.00,"split":{…},"beleg":{"name":"…pdf","pfad":"…","url":"<webUrl>","itemId":"…"}}`. Ohne Beleg: `"beleg": false`.
 8. Verschlüsseln, committen, pushen. Kurz bestätigen: Anzahl, Summe, je Kategorie.

@@ -162,7 +162,30 @@ def cmd_passwort_aendern():
     print(f"{len(dateien)} Dateien neu verschlüsselt.")
 
 
+KATEGORIEN = {"kaufpreis": "Kaufpreis", "knk": "Kaufnebenkosten", "finanzierung": "Finanzierung",
+              "renovierung": "Renovierung", "weiteres": "Weiteres"}
+
+
+def dateiname(datum, bucket, inhalt, endung="pdf"):
+    """Einheitlicher Belegname: JJJJMMTT_Kategorie_Inhalt.endung"""
+    import re, datetime
+    tag = datetime.date.fromisoformat(datum).strftime("%Y%m%d")  # bricht bei ungültigem Datum ab
+    if bucket not in KATEGORIEN:
+        sys.exit(f"Unbekannte Kategorie {bucket}. Erlaubt: {', '.join(KATEGORIEN)}")
+    t = inhalt.strip()
+    for a, b in (("Ä", "Ae"), ("Ö", "Oe"), ("Ü", "Ue"), ("ä", "ae"), ("ö", "oe"), ("ü", "ue"), ("ß", "ss")):
+        t = t.replace(a, b)
+    woerter = [w for w in re.split(r"[^A-Za-z0-9]+", t) if w]
+    if not woerter:
+        sys.exit("Inhalt fehlt.")
+    teil = "-".join(w[0].upper() + w[1:] for w in woerter)[:40].rstrip("-")
+    return f"{tag}_{KATEGORIEN[bucket]}_{teil}.{endung.lower().lstrip('.')}"
+
+
 if __name__ == "__main__":
+    if len(sys.argv) >= 5 and sys.argv[1] == "dateiname":
+        print(dateiname(sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[5] if len(sys.argv) > 5 else "pdf"))
+        sys.exit(0)
     if len(sys.argv) < 2:
         sys.exit(__doc__)
     c = sys.argv[1]
