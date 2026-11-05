@@ -1,0 +1,1079 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>R&amp;H Projektübersicht</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..700&amp;family=Geist:wght@400..700&amp;display=swap">
+<style>
+:root{
+  /* Layout: Arbeitswerkzeug, Übersicht vor Detail, mobile zuerst, ab 860px zweispaltig */
+  --bg:#eceef1;
+  --surface:#ffffff;
+  --surface-2:#f5f6f8;
+  --ink:#111418;
+  --ink-2:#4a515b;
+  --muted:#757c86;
+  --line:#dde1e6;
+  --accent:#3b3db8;
+  --accent-soft:#e5e6f9;
+  --good:#0b7a35;
+  --good-soft:#e2f3e7;
+  --bad:#c0352f;
+  --bad-soft:#fbe6e4;
+  --c1:#2a78d6; --c2:#eb6834; --c3:#1baf7a; --c4:#eda100; --c5:#e87ba4; --c6:#008300; --c4d:#94650a;
+  --font-display:"Bricolage Grotesque","Segoe UI",system-ui,sans-serif;
+  --font-body:"Geist",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --r:14px;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0d0f12; --surface:#161a1f; --surface-2:#1c2127; --ink:#eceef1; --ink-2:#b5bbc4; --muted:#8a919b; --line:#2a3038;
+    --accent:#9a9cf7; --accent-soft:#262955; --good:#43cf75; --good-soft:#14301f; --bad:#f07068; --bad-soft:#3a1d1c;
+    --c1:#3987e5; --c2:#d95926; --c3:#199e70; --c4:#c98500; --c5:#d55181; --c4d:#7a5306;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0d0f12; --surface:#161a1f; --surface-2:#1c2127; --ink:#eceef1; --ink-2:#b5bbc4; --muted:#8a919b; --line:#2a3038;
+  --accent:#9a9cf7; --accent-soft:#262955; --good:#43cf75; --good-soft:#14301f; --bad:#f07068; --bad-soft:#3a1d1c;
+  --c1:#3987e5; --c2:#d95926; --c3:#199e70; --c4:#c98500; --c5:#d55181; --c4d:#7a5306;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--font-body);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit}
+a{color:inherit}
+img{max-width:100%}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:6px}
+h1,h2,h3{margin:0;text-wrap:balance}
+h1{font-family:var(--font-display);font-weight:650;font-size:clamp(28px,5.2vw,42px);line-height:1.06;letter-spacing:-.022em}
+h2{font-size:17px;font-weight:600;letter-spacing:-.005em}
+h3{font-size:16px;font-weight:600}
+.num{font-variant-numeric:tabular-nums}
+.muted{color:var(--muted);font-size:14px}
+.hint{font-size:13px;color:var(--muted);margin:12px 0 0}
+.sw{display:inline-block;width:11px;height:11px;border-radius:3px;flex:none}
+
+/* Kopf */
+.topbar{position:sticky;top:0;z-index:30;background:color-mix(in srgb,var(--bg) 86%,transparent);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+.topbar-in{max-width:1120px;margin:0 auto;padding:11px 16px;display:flex;align-items:center;gap:12px}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;font-weight:600}
+.mark{width:30px;height:30px;border-radius:8px;background:var(--ink);color:var(--bg);display:grid;place-items:center;font-family:var(--font-display);font-size:12.5px;font-weight:700;letter-spacing:-.02em;flex:none}
+.logout{margin-left:auto;font-size:13px;padding:6px 12px;border-radius:99px;border:1px solid var(--line);background:var(--surface);color:var(--ink-2);font-weight:600;cursor:pointer}
+.lock{min-height:70vh;display:grid;place-items:center}
+.lock-box{width:100%;max-width:380px;background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:28px;display:flex;flex-direction:column;gap:14px}
+.lock-box h1{font-size:28px}
+.lock-box p{margin:0;color:var(--ink-2);font-size:14px}
+.lock-box .chk{display:flex;gap:8px;align-items:center;font-size:14px;color:var(--ink-2)}
+.lock-box .btn{justify-content:center}
+.lock-err{color:var(--bad);font-size:13px;font-weight:600;min-height:18px}
+.sitefoot{max-width:1120px;margin:0 auto;padding:0 16px 32px;font-size:12.5px;color:var(--muted)}
+.copybox{width:100%;min-height:220px;font:13px/1.45 ui-monospace,Menlo,Consolas,monospace;border:1px solid var(--line);border-radius:10px;padding:10px;background:var(--surface-2);color:var(--ink);resize:vertical}
+.notice{max-width:1120px;margin:0 auto;padding:12px 16px 0;font-size:13px;color:var(--ink-2)}
+main{max-width:1120px;margin:0 auto;padding:18px 16px 72px}
+
+/* Startseite */
+.eyebrow{font-size:13px;color:var(--ink-2);margin-bottom:6px}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;margin:22px 0 34px}
+.stat{background:var(--surface);padding:16px 18px}
+.stat .l{font-size:13px;color:var(--ink-2)}
+.stat .v{font-size:26px;font-weight:600;letter-spacing:-.015em;margin-top:2px}
+@media (max-width:760px){.stats{grid-template-columns:1fr 1fr}.stat .v{font-size:22px}}
+.section-h{display:flex;align-items:baseline;gap:10px;margin:0 0 12px}
+.section-h .count{color:var(--muted);font-size:14px}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:16px;margin-bottom:36px}
+.pcard{display:flex;flex-direction:column;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;text-decoration:none;transition:transform .15s ease,box-shadow .15s ease}
+.pcard:hover{transform:translateY(-2px);box-shadow:0 14px 34px -18px rgba(0,0,0,.35)}
+.pcard-img{position:relative;aspect-ratio:16/9;background:var(--surface-2)}
+.pcard-img img{width:100%;height:100%;object-fit:cover;display:block}
+.pcard-img .pill{position:absolute;top:10px;left:10px}
+.pcard-body{padding:16px 18px 18px;display:flex;flex-direction:column;gap:14px;flex:1}
+.addr{font-family:var(--font-display);font-size:21px;font-weight:650;letter-spacing:-.015em;line-height:1.15}
+.loc{color:var(--ink-2);font-size:14px}
+.pill{font-size:12px;font-weight:600;padding:4px 10px;border-radius:99px;white-space:nowrap;display:inline-flex;gap:6px;align-items:center}
+.pill::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor}
+.pill.run{background:var(--accent-soft);color:var(--accent)}
+.pill.done{background:var(--good-soft);color:var(--good)}
+.kv{display:grid;grid-template-columns:1fr 1fr;gap:10px 16px}
+.kv .k{font-size:12px;color:var(--muted)}
+.kv .v{font-weight:600}
+.mrow{display:flex;justify-content:space-between;font-size:12.5px;color:var(--ink-2);margin-bottom:6px}
+.meter{height:8px;border-radius:99px;background:var(--accent-soft);overflow:hidden}
+.meter>span{display:block;height:100%;background:var(--accent);border-radius:99px}
+.meter.over{background:var(--bad-soft)}
+.meter.over>span{background:var(--bad)}
+.upd{font-size:12.5px;color:var(--muted);margin-top:auto}
+.addcard{border:1.5px dashed var(--line);border-radius:var(--r);padding:22px;color:var(--ink-2);display:flex;flex-direction:column;justify-content:center;gap:8px;min-height:220px;font-size:14px}
+.addcard b{color:var(--ink);font-size:15px}
+.howto{border-top:1px solid var(--line);padding-top:24px}
+.howto-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:14px}
+.howto-grid div{font-size:14px;color:var(--ink-2)}
+.howto-grid b{display:block;color:var(--ink);margin-bottom:4px}
+.howto-grid .n{font-family:var(--font-display);font-weight:650;color:var(--accent);margin-right:6px}
+@media (max-width:760px){.howto-grid{grid-template-columns:1fr}}
+
+/* Projektseite */
+.back{display:inline-flex;gap:4px;align-items:center;color:var(--ink-2);font-size:14px;text-decoration:none;padding:4px 0}
+.back:hover{color:var(--ink)}
+.phead{display:flex;flex-wrap:wrap;gap:12px 24px;align-items:flex-start;justify-content:space-between;margin:10px 0 18px}
+.phead .pill{margin-top:4px}
+.facts{display:flex;flex-wrap:wrap;gap:6px 18px;color:var(--ink-2);font-size:14px;margin-top:10px}
+.facts b{color:var(--ink);font-weight:600}
+.tabs{position:sticky;top:53px;z-index:20;background:var(--bg);display:flex;gap:2px;border-bottom:1px solid var(--line);margin:0 -16px 20px;padding:0 16px;overflow-x:auto;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{padding:12px 12px 11px;font-weight:600;font-size:14.5px;color:var(--ink-2);text-decoration:none;border-bottom:2px solid transparent;white-space:nowrap;margin-bottom:-1px}
+.tab:hover{color:var(--ink)}
+.tab[aria-selected="true"]{color:var(--ink);border-color:var(--ink)}
+.tab .s{display:none}
+@media (max-width:520px){.tab .l{display:none}.tab .s{display:inline}.tabs{justify-content:space-between}}
+.grid2{display:grid;grid-template-columns:1.05fr 1fr;gap:16px;margin-bottom:16px}
+@media (max-width:860px){.grid2{grid-template-columns:1fr}}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:20px}
+.card-head{display:flex;justify-content:space-between;align-items:center;gap:10px 12px;flex-wrap:wrap;margin-bottom:16px}
+.seg{display:inline-flex;background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:3px;gap:2px}
+.seg button{border:0;background:none;padding:6px 11px;border-radius:7px;font-size:13px;font-weight:600;color:var(--ink-2);cursor:pointer;white-space:nowrap}
+.seg button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.14)}
+
+/* Kosten */
+.donut-row{display:grid;grid-template-columns:196px 1fr;gap:22px;align-items:center}
+@media (max-width:520px){.donut-row{grid-template-columns:1fr}.donut{max-width:220px;margin:0 auto}}
+.donut{position:relative;width:100%;aspect-ratio:1}
+.donut svg{width:100%;height:100%;display:block;overflow:visible}
+.donut path{cursor:pointer;transition:opacity .15s ease}
+.donut .ctr{position:absolute;inset:0;display:grid;place-content:center;text-align:center;pointer-events:none}
+.ctr .l{font-size:12px;color:var(--muted)}
+.ctr .v{font-size:19px;font-weight:600;letter-spacing:-.01em}
+.legend{list-style:none;margin:0;padding:0}
+.legend button{width:100%;display:grid;grid-template-columns:11px 1fr auto 52px;gap:10px;align-items:center;background:none;border:0;border-bottom:1px solid var(--line);padding:9px 6px;cursor:pointer;text-align:left;border-radius:0;font-size:14px}
+.legend li:last-child button{border-bottom:0}
+.legend .amt{font-variant-numeric:tabular-nums;font-weight:600}
+.legend .shr{font-variant-numeric:tabular-nums;color:var(--muted);font-size:13px;text-align:right}
+.legend button[aria-pressed="true"]{background:var(--surface-2);border-radius:8px}
+.legend.dim button:not([aria-pressed="true"]){opacity:.45}
+.hero-l{font-size:13px;color:var(--ink-2)}
+.hero-v{font-size:clamp(32px,6vw,44px);font-weight:600;letter-spacing:-.025em;line-height:1.08;margin:2px 0 6px}
+.hero-s{font-size:14px;color:var(--ink-2)}
+.brows{display:flex;flex-direction:column;gap:13px;margin-top:20px}
+.brow-top{display:flex;justify-content:space-between;gap:10px;font-size:14px;margin-bottom:5px}
+.brow-top .nm{display:flex;align-items:center;gap:8px;min-width:0}
+.brow-top .vals{font-variant-numeric:tabular-nums;font-weight:600;white-space:nowrap}
+.brow-top .of{color:var(--muted);font-weight:400}
+.overtag{color:var(--bad);font-size:12px;font-weight:600;margin-top:4px}
+.split{margin-top:22px;padding-top:18px;border-top:1px solid var(--line)}
+.split-h{font-size:14px;font-weight:600}
+.segbar{display:flex;gap:2px;height:28px;margin:10px 0 8px}
+.segbar>div{border-radius:4px;display:flex;align-items:center;padding:0 7px;font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;min-width:2px}
+.split-l{display:flex;flex-wrap:wrap;gap:4px 16px;font-size:13px;color:var(--ink-2)}
+.split-l span{display:inline-flex;align-items:center;gap:6px}
+.chips{display:flex;gap:6px;overflow-x:auto;padding:2px 0 6px;margin-bottom:6px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{border:1px solid var(--line);background:var(--surface);border-radius:99px;padding:6px 12px;font-size:13px;font-weight:600;color:var(--ink-2);white-space:nowrap;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+.chip .n{color:var(--muted);font-weight:500}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--surface);border-color:var(--ink)}
+.chip[aria-pressed="true"] .n{color:inherit;opacity:.7}
+.inv{list-style:none;margin:0;padding:0}
+.inv li{display:grid;grid-template-columns:82px 1fr auto;gap:3px 14px;padding:13px 0;border-bottom:1px solid var(--line);align-items:start}
+.inv .dt{font-size:13px;color:var(--ink-2);font-variant-numeric:tabular-nums;padding-top:1px}
+.inv .who{font-weight:600}
+.inv .what{font-size:14px;color:var(--ink-2)}
+.inv .amt{font-weight:600;font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap}
+.inv .meta{grid-column:2 / 4;display:flex;flex-wrap:wrap;gap:4px 14px;align-items:center;font-size:12.5px;color:var(--muted);margin-top:3px}
+.btag{display:inline-flex;align-items:center;gap:6px;color:var(--ink-2);font-weight:600}
+.btag i{width:8px;height:8px;border-radius:2px}
+.belegbtn{border:0;background:none;color:var(--accent);font-weight:600;font-size:12.5px;cursor:pointer;padding:0;display:inline-flex;gap:4px;align-items:center}
+.nobeleg{color:var(--bad);font-weight:600}
+.inv-sum{display:flex;justify-content:space-between;gap:12px;padding-top:13px;font-weight:600}
+@media (max-width:420px){.inv li{grid-template-columns:1fr auto}.inv .dt{grid-column:1 / 3}.inv .meta{grid-column:1 / 3}}
+
+/* Timeline */
+.tl-tools{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:20px}
+.tl{list-style:none;margin:0;padding:0;max-width:900px}
+.tl-item{display:grid;grid-template-columns:62px 22px 1fr;gap:0 14px}
+.tl-date{text-align:right;padding-top:1px}
+.tl-date .d{display:block;font-family:var(--font-display);font-size:28px;font-weight:650;line-height:1;letter-spacing:-.02em}
+.tl-date .m{display:block;font-size:13px;font-weight:600;color:var(--ink-2);margin-top:4px}
+.tl-date .y{display:block;font-size:12px;color:var(--muted)}
+.tl-rail{position:relative;display:flex;justify-content:center}
+.tl-rail::before{content:"";position:absolute;top:0;bottom:0;width:2px;background:var(--line)}
+.tl-item:first-child .tl-rail::before{top:12px}
+.tl-item:last-child .tl-rail::before{bottom:auto;height:12px}
+.tl-dot{position:relative;margin-top:5px;width:14px;height:14px;border-radius:50%;background:var(--bg);border:3px solid var(--muted)}
+.tl-item.key .tl-dot{border-color:var(--accent);background:var(--accent)}
+.tl-body{padding-bottom:34px;min-width:0}
+.tl-tag{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--accent);margin-bottom:3px}
+.tl-body p{margin:6px 0 12px;color:var(--ink-2);max-width:65ch}
+.photos{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px}
+.ph{padding:0;border:0;border-radius:10px;overflow:hidden;cursor:pointer;position:relative;background:var(--surface-2);aspect-ratio:4/3;display:block}
+.ph img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .3s ease}
+.ph:hover img{transform:scale(1.03)}
+.ph-cap{position:absolute;left:6px;bottom:6px;font-size:11px;font-weight:600;background:rgba(0,0,0,.58);color:#fff;padding:2px 7px;border-radius:6px;max-width:calc(100% - 12px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+@media (max-width:520px){.tl-item{grid-template-columns:42px 16px 1fr;gap:0 9px}.tl-date .d{font-size:23px}.photos{grid-template-columns:1fr 1fr}}
+
+/* Gewinn */
+.tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
+@media (max-width:860px){.tiles{grid-template-columns:1fr 1fr}}
+.tile{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px}
+.tile .l{font-size:13px;color:var(--ink-2)}
+.tile .v{font-size:26px;font-weight:600;letter-spacing:-.02em;margin:3px 0 2px}
+.tile .d{font-size:12.5px;color:var(--muted)}
+@media (max-width:420px){.tile .v{font-size:21px}}
+.delta{font-weight:600}
+.delta.pos{color:var(--good)}
+.delta.neg{color:var(--bad)}
+.tablewrap{overflow-x:auto}
+table.gw{width:100%;border-collapse:collapse;font-size:14px}
+.gw th{font-size:12px;font-weight:600;color:var(--muted);text-align:right;padding:8px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
+.gw th:first-child,.gw td:first-child{text-align:left;padding-left:0}
+.gw th:last-child,.gw td:last-child{padding-right:0}
+.gw td{padding:10px 10px;border-bottom:1px solid var(--line);text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.gw td:first-child{white-space:normal;min-width:130px}
+.gw tr.grp td{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);padding-top:18px}
+.gw tr.sub td{color:var(--muted);font-size:13px;padding-top:5px;padding-bottom:5px}
+.gw tr.sub td:first-child{padding-left:20px}
+.gw tr.sum td{font-weight:700}
+.gw tr.res td{font-weight:700;font-size:16px;border-top:2px solid var(--ink);border-bottom:0;padding-top:12px}
+.gw tr.kpi td{border-bottom:0;padding-top:6px;padding-bottom:6px;color:var(--ink-2)}
+.gw .bn{display:inline-flex;align-items:center;gap:8px}
+.szen{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:12px;overflow:hidden;margin-top:6px}
+.szen>div{background:var(--surface);padding:14px 16px}
+.szen .t{font-size:12.5px;color:var(--ink-2);font-weight:600}
+.szen .p{font-size:13px;color:var(--muted)}
+.szen .g{font-size:20px;font-weight:600;letter-spacing:-.01em;margin-top:6px}
+.szen .on{background:var(--accent-soft)}
+.szen .on .t{color:var(--accent)}
+@media (max-width:560px){.szen{grid-template-columns:1fr}}
+.dvm{display:none;font-size:12px;font-weight:600;color:var(--muted)}
+.nm-s{display:none}
+@media (max-width:560px){.gw th:nth-child(4),.gw td:nth-child(4){display:none}.dvm{display:block;font-size:11px}.gw td,.gw th{padding-left:5px;padding-right:5px}.gw td{white-space:normal}.gw td:first-child{min-width:0;hyphens:auto;-webkit-hyphens:auto;overflow-wrap:anywhere}table.gw{font-size:13px}.gw tr.sub td{font-size:12px}.gw tr.res td{font-size:14.5px}.nm-l{display:none}.nm-s{display:inline}}
+.foot{font-size:12.5px;color:var(--muted);margin-top:16px;line-height:1.6;max-width:90ch}
+
+/* Abschlussbericht */
+.op-tools{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+.btn{display:inline-flex;align-items:center;gap:8px;background:var(--ink);color:var(--surface);border:0;border-radius:10px;padding:10px 16px;font-weight:600;cursor:pointer;text-decoration:none;font-size:14px}
+.btn.ghost{background:var(--surface);color:var(--ink);border:1px solid var(--line)}
+.sheet{--p-ink:#111418;--p-ink2:#4a515b;--p-muted:#7b818a;--p-line:#e3e5e9;
+  --c1:#2a78d6;--c2:#eb6834;--c3:#1baf7a;--c4:#eda100;--c5:#e87ba4;--c6:#008300;
+  background:#fff;color:var(--p-ink);max-width:794px;margin:0 auto;padding:44px 48px 36px;border-radius:4px;box-shadow:0 1px 3px rgba(0,0,0,.1),0 18px 44px -20px rgba(0,0,0,.35);color-scheme:light}
+.sh-top{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;padding-bottom:14px;border-bottom:1px solid var(--p-line)}
+.sh-brand{display:flex;gap:10px;align-items:center}
+.sh-brand .mark{background:#111418;color:#fff;width:30px;height:30px;font-size:10px}
+.sh-brand b,.sh-doc b{display:block;font-size:13px}
+.sh-brand span,.sh-doc span{display:block;font-size:11.5px;color:var(--p-muted)}
+.sh-doc{text-align:right}
+.sh-title{margin:22px 0 14px}
+.sh-title .loc{color:var(--p-ink2);font-size:13px}
+.sh-title h2{font-family:var(--font-display);font-size:30px;font-weight:650;letter-spacing:-.02em;line-height:1.1}
+.sh-facts{display:grid;grid-template-columns:repeat(4,1fr);gap:10px 16px;margin:0 0 22px;padding:14px 0;border-top:1px solid var(--p-line);border-bottom:1px solid var(--p-line)}
+.sh-facts div{min-width:0}
+.sh-facts dt{font-size:11px;color:var(--p-muted)}
+.sh-facts dd{margin:0;font-size:13.5px;font-weight:600}
+.sh-h{font-size:11.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--p-muted);margin:0 0 10px}
+.sh-pairs{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:24px}
+.sh-pairs figure{margin:0;display:flex;flex-direction:column;gap:5px}
+.sh-pairs figcaption{font-size:12px;font-weight:600}
+.ba{position:relative;border-radius:6px;overflow:hidden;aspect-ratio:4/3;background:#eee}
+.ba img{width:100%;height:100%;object-fit:cover;display:block}
+.ba span{position:absolute;left:5px;top:5px;font-size:10px;font-weight:700;background:rgba(255,255,255,.92);color:#111;padding:1px 6px;border-radius:4px}
+.ba.after span{background:#111;color:#fff}
+.sh-gw{display:grid;grid-template-columns:1.45fr 1fr;gap:28px;align-items:start}
+.sh-gw table{width:100%;border-collapse:collapse;font-size:13.5px}
+.sh-gw td{padding:7px 0;border-bottom:1px solid var(--p-line)}
+.sh-gw td:last-child{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap;padding-left:12px}
+.sh-gw tr.vk td{font-weight:600}
+.sh-gw tr.res td{border-bottom:0;border-top:2px solid var(--p-ink);font-weight:700;font-size:15px;padding-top:10px}
+.sh-kpis{display:flex;flex-direction:column;gap:14px;background:#f4f5f7;border-radius:8px;padding:16px 18px}
+.sh-kpi .l{font-size:11.5px;color:var(--p-muted)}
+.sh-kpi .v{font-size:21px;font-weight:650;letter-spacing:-.01em}
+.sh-kpi.big .v{font-size:29px;color:#0b6b2e}
+.sh-bar{margin-top:22px}
+.sh-bar .segbar>div{font-size:11px}
+.sh-legend{display:flex;flex-wrap:wrap;gap:5px 14px;font-size:11.5px;color:var(--p-ink2)}
+.sh-legend span{display:inline-flex;align-items:center;gap:5px}
+.sh-foot{margin-top:24px;padding-top:12px;border-top:1px solid var(--p-line);font-size:10.5px;color:var(--p-muted);display:flex;justify-content:space-between;gap:6px 16px;flex-wrap:wrap}
+@media (max-width:640px){.sheet{padding:22px 18px}.sh-facts{grid-template-columns:1fr 1fr}.sh-pairs{grid-template-columns:1fr 1fr}.sh-gw{grid-template-columns:1fr}.sh-title h2{font-size:25px}}
+.empty{max-width:560px;display:flex;flex-direction:column;gap:12px;align-items:flex-start}
+.empty p{margin:0;color:var(--ink-2)}
+
+/* Neues Projekt */
+.sub{color:var(--ink-2);margin:8px 0 0;max-width:65ch}
+.form-grid{display:grid;grid-template-columns:1fr 340px;gap:16px;align-items:start}
+@media (max-width:900px){.form-grid{grid-template-columns:1fr}}
+.fsec{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:20px;margin-bottom:16px}
+.fsec>h2{margin-bottom:14px}
+.fields{display:grid;grid-template-columns:repeat(2,1fr);gap:14px 16px}
+@media (max-width:520px){.fields{grid-template-columns:1fr}}
+.fld{display:flex;flex-direction:column;gap:5px;min-width:0}
+.fld label{font-size:13px;font-weight:600;color:var(--ink-2)}
+.fld .req{color:var(--accent)}
+.inp{display:flex;align-items:center;border:1px solid var(--line);border-radius:10px;background:var(--surface);overflow:hidden}
+.inp:focus-within{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.inp input,.inp select{flex:1;min-width:0;border:0;background:transparent;padding:10px 12px;font:inherit;font-size:15px;color:var(--ink);outline:none}
+.inp .u{padding:0 12px 0 0;color:var(--muted);font-size:13px;white-space:nowrap}
+.fh{font-size:12px;color:var(--muted)}
+.fld.err .inp{border-color:var(--bad)}
+.em{font-size:12px;color:var(--bad);font-weight:600}
+details.fsec>summary{cursor:pointer;font-weight:600;font-size:17px;list-style:none;display:flex;justify-content:space-between;align-items:center;gap:12px}
+details.fsec>summary::-webkit-details-marker{display:none}
+details.fsec>summary .muted{font-weight:400}
+details.fsec>summary::after{content:"+";font-weight:400;font-size:20px;color:var(--muted)}
+details[open].fsec>summary::after{content:"\2212"}
+details[open].fsec>summary{margin-bottom:14px}
+.sumcard{position:sticky;top:70px}
+@media (max-width:900px){.sumcard{position:static}}
+.sumrow{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid var(--line);font-size:14px}
+.sumrow .nm{display:flex;align-items:center;gap:8px}
+.sumrow b{font-variant-numeric:tabular-nums}
+.sumrow.t{font-weight:700;border-bottom:2px solid var(--ink)}
+.sumrow.on{background:var(--accent-soft);margin:0 -8px;padding:8px;border-radius:8px;border-bottom:0}
+.sum-h{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:16px 0 4px}
+.form-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+.banner{background:var(--accent-soft);border-radius:12px;padding:12px 14px;font-size:14px;margin:0 0 16px}
+.ph-empty{width:100%;height:100%;display:grid;place-items:center;color:var(--muted);font-size:13px;background:repeating-linear-gradient(135deg,var(--surface-2) 0 10px,var(--bg) 10px 20px)}
+a.addcard{text-decoration:none;cursor:pointer;transition:border-color .15s ease}
+a.addcard:hover{border-color:var(--accent)}
+.addcard .go{color:var(--accent);font-weight:600}
+
+/* Overlays */
+.lb{position:fixed;inset:0;z-index:60;background:rgba(8,10,12,.94);display:none;flex-direction:column;align-items:center;justify-content:center;padding:56px 16px 24px;gap:12px}
+.lb.open{display:flex}
+.lb img{max-width:min(1100px,100%);max-height:calc(100% - 50px);border-radius:8px;object-fit:contain}
+.lb-cap{color:#e9ecef;font-size:14px;text-align:center}
+.lb-x,.lb-nav{position:absolute;border:0;background:rgba(255,255,255,.12);color:#fff;width:42px;height:42px;border-radius:50%;cursor:pointer;font-size:22px;line-height:1;display:grid;place-items:center}
+.lb-x{top:12px;right:12px}
+.lb-nav{top:50%;transform:translateY(-50%)}
+.lb-nav.prev{left:12px}.lb-nav.next{right:12px}
+.modal{position:fixed;inset:0;z-index:70;background:rgba(10,12,15,.5);display:none;align-items:center;justify-content:center;padding:16px}
+.modal.open{display:flex}
+.modal-box{background:var(--surface);color:var(--ink);border-radius:16px;max-width:460px;width:100%;padding:22px;display:flex;flex-direction:column;gap:12px;box-shadow:0 24px 60px -20px rgba(0,0,0,.5)}
+.modal-box p{margin:0;color:var(--ink-2);font-size:14px}
+.modal-box code{font-size:12.5px;background:var(--surface-2);padding:2px 6px;border-radius:6px;word-break:break-all}
+.modal-box .btn{align-self:flex-end}
+.tip{position:fixed;z-index:80;pointer-events:none;background:var(--ink);color:var(--surface);border-radius:8px;padding:7px 10px;font-size:12.5px;display:flex;flex-direction:column;box-shadow:0 8px 24px -10px rgba(0,0,0,.5)}
+.tip[hidden]{display:none}
+@media (prefers-reduced-motion: reduce){*{transition:none!important}}
+
+@media print{
+  @page{size:A4;margin:10mm}
+  body{background:#fff}
+  .topbar,.notice,.back,.phead,.tabs,.op-tools,.lb,.modal,.tip{display:none!important}
+  main{padding:0;max-width:none}
+  .sheet{box-shadow:none;border-radius:0;max-width:none;padding:0}
+  .sh-facts{grid-template-columns:repeat(4,1fr)}.sh-pairs{grid-template-columns:repeat(4,1fr)}.sh-gw{grid-template-columns:1.45fr 1fr}
+  *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-in">
+    <a class="brand" href="#start"><span class="mark">R&amp;H</span><span>Projekte</span></a>
+    <button class="logout" id="logout" data-act="logout" hidden>Abmelden</button>
+  </div>
+</header>
+<main id="app"><p class="muted">Lädt …</p></main>
+<footer class="sitefoot" id="foot"></footer>
+
+<div class="lb" id="lb" role="dialog" aria-modal="true" aria-label="Foto">
+  <button class="lb-x" data-act="lb-close" aria-label="Schließen">&times;</button>
+  <button class="lb-nav prev" data-act="lb-prev" aria-label="Vorheriges Foto">&#8249;</button>
+  <img id="lb-img" alt="">
+  <div class="lb-cap" id="lb-cap"></div>
+  <button class="lb-nav next" data-act="lb-next" aria-label="Nächstes Foto">&#8250;</button>
+</div>
+<div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="m-t">
+  <div class="modal-box"><h3 id="m-t"></h3><div id="m-b" style="display:flex;flex-direction:column;gap:10px"></div><button class="btn" data-act="m-close">Schließen</button></div>
+</div>
+<div class="tip" id="tip" hidden></div>
+
+<script>
+/* ============ Daten (später je Projekt eine JSON-Datei) ============ */
+const BUCKETS = [
+  {key:'kaufpreis',    name:'Kaufpreis',           short:'Kaufpreis',    color:'var(--c1)', ink:'#fff'},
+  {key:'knk',          name:'Kaufnebenkosten',     short:'Nebenkosten',  color:'var(--c2)', ink:'#fff'},
+  {key:'finanzierung', name:'Finanzierungskosten', short:'Finanzierung', color:'var(--c3)', ink:'#fff'},
+  {key:'renovierung',  name:'Renovierungskosten',  short:'Renovierung',  color:'var(--c4)', ink:'#0b0b0b'},
+  {key:'weiteres',     name:'Weitere Kosten',      short:'Weiteres',     color:'var(--c5)', ink:'#fff'},
+];
+const KEYS = BUCKETS.map(b=>b.key);
+const BMAP = Object.fromEntries(BUCKETS.map(b=>[b.key,b]));
+
+let PROJEKTE = [];
+let INDEX = null;
+
+/* ============ Hilfsfunktionen ============ */
+const MON = ['Jan','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'];
+const pd = s => { const [y,m,d] = s.split('-').map(Number); return new Date(y, m-1, d); };
+const fd = s => { const d = typeof s==='string' ? pd(s) : s; return String(d.getDate()).padStart(2,'0')+'.'+String(d.getMonth()+1).padStart(2,'0')+'.'+d.getFullYear(); };
+const monthsBetween = (a,b) => (b-a)/(864e5*30.4375);
+const r2 = x => Math.round(x*100)/100;
+const F0 = new Intl.NumberFormat('de-DE',{style:'currency',currency:'EUR',minimumFractionDigits:0,maximumFractionDigits:0});
+const F2 = new Intl.NumberFormat('de-DE',{style:'currency',currency:'EUR',minimumFractionDigits:2,maximumFractionDigits:2});
+const e0 = v => F0.format(v);
+const e2 = v => F2.format(v);
+const pc = (v,d=1) => (v*100).toLocaleString('de-DE',{minimumFractionDigits:d,maximumFractionDigits:d})+' %';
+const mo = v => v.toLocaleString('de-DE',{minimumFractionDigits:1,maximumFractionDigits:1})+' Monate';
+const m2 = v => v.toLocaleString('de-DE',{maximumFractionDigits:2})+' m²';
+const sgn = (v,f) => (v>0.004?'+':v<-0.004?'−':'±')+f(Math.abs(v));
+const dl = (v,upGood,f=e0) => { const cls = Math.abs(v)<0.5 ? '' : ((v>0)===upGood ? 'pos':'neg'); return `<span class="delta ${cls}">${sgn(v,f)}</span>`; };
+const slug = s => s.toLowerCase().replace(/ä/g,'ae').replace(/ö/g,'oe').replace(/ü/g,'ue').replace(/ß/g,'ss').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+
+function calc(p){
+  const plan = {kaufpreis:0,knk:0,finanzierung:0,renovierung:0,weiteres:0};
+  p.plan.positionen.forEach(x => plan[x.bucket] = r2(plan[x.bucket]+x.betrag));
+  const ist = {kaufpreis:0,knk:0,finanzierung:0,renovierung:0,weiteres:0};
+  let mat=0, arb=0, proxy=0;
+  p.kosten.forEach(k => {
+    ist[k.bucket] = r2(ist[k.bucket]+k.betrag);
+    if(k.split){ mat += k.split.material; arb += k.split.arbeit; if(k.split.proxy) proxy += k.betrag; }
+  });
+  const planSum = r2(KEYS.reduce((s,k)=>s+plan[k],0));
+  const istSum = r2(KEYS.reduce((s,k)=>s+ist[k],0));
+  const vkPlan = p.plan.verkauf.mitte.preis;
+  const planGewinn = r2(vkPlan - planSum);
+  const done = p.status === 'abgeschlossen';
+  const dauer = Math.max(0, monthsBetween(pd(p.ankauf), done ? pd(p.verkauf.datum) : new Date()));
+  const ekAuto = p.eigenkapital == null;
+  const ek0 = ekAuto ? r2(planSum - (p.plan.darlehen || 0)) : p.eigenkapital;
+  const c = {plan, ist, planSum, istSum, vkPlan, planGewinn, planMarge: planGewinn/planSum, ek0, ekAuto,
+    planEk: planGewinn/ek0, planEkPa: planGewinn/ek0*12/p.plan.dauerMonate,
+    dauer, mat:r2(mat), arb:r2(arb), proxy:r2(proxy)};
+  c.szen = Object.fromEntries(Object.entries(p.plan.verkauf).map(([k,v]) => { const g = r2(v.preis-planSum); return [k,{...v, gewinn:g, marge:g/planSum}]; }));
+  if(done){
+    c.gewinn = r2(p.verkauf.preis - istSum);
+    c.marge = c.gewinn/istSum;
+    c.ek = c.gewinn/ek0;
+    c.ekPa = c.ek*12/dauer;
+  }
+  return c;
+}
+
+/* ============ Verschlüsselung (AES-GCM, Schlüssel per PBKDF2 aus dem Passwort) ============ */
+let META = null, KEY = null;
+const b64d = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
+const b64e = u => { let x=''; u.forEach(b => x += String.fromCharCode(b)); return btoa(x); };
+const ls = {get:k=>{try{return localStorage.getItem(k);}catch(e){return null;}}, set:(k,v)=>{try{localStorage.setItem(k,v);}catch(e){}}, del:k=>{try{localStorage.removeItem(k);}catch(e){}}};
+async function deriveRaw(pw){
+  const base = await crypto.subtle.importKey('raw', new TextEncoder().encode(pw), 'PBKDF2', false, ['deriveBits']);
+  return new Uint8Array(await crypto.subtle.deriveBits({name:'PBKDF2', hash:'SHA-256', salt:b64d(META.salt), iterations:META.iter}, base, 256));
+}
+const importRaw = raw => crypto.subtle.importKey('raw', raw, 'AES-GCM', false, ['decrypt']);
+async function fetchEnc(path){
+  const r = await fetch(path, {cache:'no-cache'});
+  if(!r.ok) throw new Error('Datei fehlt: '+path);
+  const u = new Uint8Array(await r.arrayBuffer());
+  return crypto.subtle.decrypt({name:'AES-GCM', iv:u.slice(0,12)}, KEY, u.slice(12));
+}
+const fetchJSON = async path => JSON.parse(new TextDecoder().decode(await fetchEnc(path)));
+const FOTO_CACHE = new Map();
+function fotoURL(key){
+  if(!FOTO_CACHE.has(key)) FOTO_CACHE.set(key, fetchEnc('fotos/'+key+'.enc').then(b => URL.createObjectURL(new Blob([b], {type:'image/jpeg'}))));
+  return FOTO_CACHE.get(key);
+}
+let fotoObs = null;
+function hydrateFotos(){
+  const imgs = document.querySelectorAll('img[data-foto]:not([src])');
+  const load = img => fotoURL(img.dataset.foto).then(u => { img.src = u; }).catch(() => { img.alt = 'Foto nicht ladbar'; });
+  if(!('IntersectionObserver' in window)){ imgs.forEach(load); return; }
+  if(!fotoObs) fotoObs = new IntersectionObserver(es => es.forEach(e => { if(e.isIntersecting){ fotoObs.unobserve(e.target); load(e.target); } }), {rootMargin:'400px'});
+  imgs.forEach(img => fotoObs.observe(img));
+}
+const esc = v => String(v ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+async function loadAll(){
+  INDEX = await fetchJSON('daten/index.enc');
+  PROJEKTE = await Promise.all(INDEX.projekte.map(id => fetchJSON('daten/'+id+'.enc')));
+  document.getElementById('logout').hidden = false;
+  document.getElementById('foot').textContent = INDEX.aktualisiert ? 'Stand der Daten: '+fd(INDEX.aktualisiert.slice(0,10))+', '+INDEX.aktualisiert.slice(11,16)+' Uhr' : '';
+  lastProject = parseRoute().p ? parseRoute().p.id : null;
+  render();
+}
+function showLock(msg){
+  document.getElementById('logout').hidden = true;
+  document.getElementById('foot').textContent = '';
+  document.getElementById('app').innerHTML = `<div class="lock"><form class="lock-box" id="lock-form">
+    <span class="mark">R&amp;H</span><h1>Projektübersicht</h1>
+    <p>Rehrmann &amp; Harms Immobilien. Zugang nur mit Passwort.</p>
+    <div class="fld"><label for="pw">Passwort</label><div class="inp"><input id="pw" type="password" autocomplete="current-password" required></div></div>
+    <label class="chk"><input type="checkbox" id="remember" checked> Auf diesem Gerät merken</label>
+    <div class="lock-err" id="lock-err">${msg||''}</div>
+    <button class="btn" type="submit">Entsperren</button>
+  </form></div>`;
+  setTimeout(()=>{ const el=document.getElementById('pw'); if(el) el.focus(); }, 50);
+}
+async function unlock(pw, remember){
+  const raw = await deriveRaw(pw);
+  KEY = await importRaw(raw);
+  try { await loadAll(); }
+  catch(e){ KEY = null; throw e; }
+  if(remember){ ls.set('rh-key', b64e(raw)); ls.set('rh-salt', META.salt); }
+}
+async function boot(){
+  try { META = await (await fetch('daten/meta.json', {cache:'no-cache'})).json(); }
+  catch(e){ document.getElementById('app').innerHTML = '<p class="muted">Die Daten konnten nicht geladen werden. Seite neu laden.</p>'; return; }
+  const saved = ls.get('rh-key');
+  if(saved && ls.get('rh-salt') === META.salt){
+    try { KEY = await importRaw(b64d(saved)); await loadAll(); return; }
+    catch(e){ ls.del('rh-key'); ls.del('rh-salt'); KEY = null; }
+  }
+  showLock();
+}
+document.addEventListener('submit', async e => {
+  if(e.target.id !== 'lock-form') return;
+  e.preventDefault();
+  const btn = e.target.querySelector('button'), err = document.getElementById('lock-err');
+  btn.disabled = true; btn.textContent = 'Prüfe …'; err.textContent = '';
+  try { await unlock(document.getElementById('pw').value, document.getElementById('remember').checked); }
+  catch(x){ btn.disabled = false; btn.textContent = 'Entsperren'; err.textContent = x && x.name === 'OperationError' ? 'Passwort falsch.' : 'Fehler beim Laden: '+(x && x.message || x); }
+});
+
+/* ============ Bausteine ============ */
+const ICON = {
+  back:'<svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M10 3 5 8l5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  doc:'<svg width="13" height="13" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4 1.5h5l3.5 3.5v9.5H4z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M9 1.5V5h3.5" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>',
+  print:'<svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4 6V1.5h8V6M4 12H2.5V6.5h11V12H12M4 9.5h8v5H4z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>',
+};
+const state = {donut:'alle', filter:'alle', sort:'neu'};
+let LB = {fotos:[], i:0};
+
+function arcPath(cx,cy,R,r,a0,a1){
+  if(a1-a0 >= Math.PI*2-1e-6) a1 = a0+Math.PI*2-1e-4;
+  const large = a1-a0 > Math.PI ? 1 : 0;
+  const pt = (rad,a) => (cx+rad*Math.cos(a)).toFixed(2)+' '+(cy+rad*Math.sin(a)).toFixed(2);
+  return `M${pt(R,a0)} A${R} ${R} 0 ${large} 1 ${pt(R,a1)} L${pt(r,a1)} A${r} ${r} 0 ${large} 0 ${pt(r,a0)} Z`;
+}
+function donutSVG(parts, tot, sel){
+  let a = -Math.PI/2, out='';
+  parts.forEach(pt => {
+    if(pt.value <= 0) return;
+    const a1 = a + pt.value/tot*Math.PI*2;
+    const dim = sel!=='alle' && sel!==pt.key;
+    out += `<path d="${arcPath(100,100,96,64,a,a1)}" style="fill:${pt.color};stroke:var(--surface);stroke-width:2;opacity:${dim?.28:1}" data-act="filter" data-key="${pt.key}" data-tip="${pt.name}|${e0(pt.value)} · ${pc(pt.value/tot)}"></path>`;
+    a = a1;
+  });
+  return `<svg viewBox="0 0 200 200" role="img" aria-label="Kostenverteilung nach Kategorien">${out}</svg>`;
+}
+function segbar(parts, minShare){
+  const tot = parts.reduce((s,x)=>s+Math.max(0,x.value),0);
+  const label = parts.map(x=>`${x.name} ${e0(x.value)} (${pc(x.value/tot,0)})`).join(', ');
+  return `<div class="segbar" role="img" aria-label="${label}">${parts.filter(x=>x.value>0).map(x=>{ const sh=x.value/tot; return `<div style="flex:${x.value} 1 0;background:${x.color};color:${x.ink}" data-tip="${x.name}|${e0(x.value)} · ${pc(sh)}">${sh>=minShare?pc(sh,0):''}</div>`; }).join('')}</div>`;
+}
+function coverFoto(p){
+  const withF = p.timeline.filter(t=>t.fotos.length);
+  if(!withF.length) return null;
+  const t = p.status==='abgeschlossen' ? (p.timeline.find(x=>x.typ==='abschluss') || withF[withF.length-1]) : withF[withF.length-1];
+  return {f:t.fotos[0], key:p.id+'/'+t.fotos[0].id+'_t'};
+}
+const statusPill = p => p.status==='abgeschlossen' ? '<span class="pill done">Abgeschlossen</span>' : `<span class="pill run">${p.phase}</span>`;
+
+/* ============ Startseite ============ */
+function renderStart(){
+  const rows = PROJEKTE.map(p=>({p, c:calc(p)}));
+  const lauf = rows.filter(r=>r.p.status==='laufend');
+  const done = rows.filter(r=>r.p.status==='abgeschlossen');
+  const realisiert = done.reduce((s,r)=>s+r.c.gewinn,0);
+  const umsatz = done.reduce((s,r)=>s+r.p.verkauf.preis,0);
+  const stat = (l,v) => `<div class="stat"><div class="l">${l}</div><div class="v">${v}</div></div>`;
+  return `
+  <div class="eyebrow">Rehrmann &amp; Harms Immobilien</div>
+  <h1>Fix &amp; Flip Projekte</h1>
+  <div class="stats">
+    ${stat('Laufende Projekte', lauf.length)}
+    ${stat('Abgeschlossene Projekte', done.length)}
+    ${stat('Realisierter Gewinn vor Steuern', e0(realisiert))}
+    ${stat('Gesamtumsatz aus Verkäufen', e0(umsatz))}
+  </div>
+  <div class="section-h"><h2>Laufend</h2><span class="count">${lauf.length}</span></div>
+  <div class="cards">${lauf.map(card).join('')}
+    <a class="addcard" href="#neu"><b>Neues Projekt</b><span>Im Claude-Chat die ausgefüllte Fix-and-Flip-Excel schicken. Oder hier die wichtigsten Daten eingeben und den erzeugten Text an Claude schicken.</span><span class="go">Daten eingeben</span></a>
+  </div>
+  <div class="section-h"><h2>Abgeschlossen</h2><span class="count">${done.length}</span></div>
+  <div class="cards">${done.map(card).join('')}</div>
+  <section class="howto">
+    <h2>So wird die Seite gepflegt</h2>
+    <div class="howto-grid">
+      <div><b><span class="n">1</span>Rechnung erfassen</b>Rechnung im OneDrive in „11_Projektdokumentation &amp; Rechnungen“ unter „00_Eingang“ ablegen. Im Claude-Chat „Neue Belege verarbeiten“ schreiben. Claude liest aus, ordnet zu und legt die Datei im Projektordner nach Rechnungsdatum ab.</div>
+      <div><b><span class="n">2</span>Fortschritt dokumentieren</b>Fotos und ein paar Stichworte schicken. Daraus wird ein datierter Eintrag in der Timeline.</div>
+      <div><b><span class="n">3</span>Projekt abschließen</b>Verkaufspreis, Verkaufsdatum und Abschlussfotos schicken. Gewinnermittlung und Abschlussbericht laufen dann auf Ist-Werten.</div>
+    </div>
+  </section>`;
+}
+function card({p,c}){
+  const done = p.status==='abgeschlossen';
+  const cov = coverFoto(p);
+  const last = p.timeline.map(t=>t.datum).sort().pop();
+  const kv = done
+    ? [['Verkaufspreis', e0(p.verkauf.preis)], ['Gewinn vor Steuern', e0(c.gewinn)], ['Marge', pc(c.marge)], ['Projektdauer', mo(c.dauer)]]
+    : [['Kosten bisher', e0(c.istSum)], ['Plan gesamt', e0(c.planSum)], ['Erwarteter Gewinn', e0(c.planGewinn)], ['Seit Ankauf', mo(c.dauer)]];
+  const share = c.istSum/c.planSum;
+  return `<a class="pcard" href="#${p.id}--kosten">
+    <div class="pcard-img">${cov ? `<img data-foto="${cov.key}" alt="${esc(cov.f.cap)}">` : '<div class="ph-empty">Noch keine Fotos</div>'}${statusPill(p)}</div>
+    <div class="pcard-body">
+      <div><div class="addr">${esc(p.adresse)}</div><div class="loc">${p.stadtteil}, ${p.ort} · ${m2(p.wohnflaeche)}${p.zimmer?' · '+p.zimmer.toLocaleString('de-DE')+' Zimmer':''}</div></div>
+      ${done ? '' : `<div><div class="mrow"><span>Kosten bisher im Verhältnis zum Plan</span><span class="num">${pc(share,0)}</span></div><div class="meter"><span style="width:${Math.min(100,share*100)}%"></span></div></div>`}
+      <div class="kv">${kv.map(([k,v])=>`<div><div class="k">${k}</div><div class="v num">${v}</div></div>`).join('')}</div>
+      <div class="upd">${last ? 'Letzter Eintrag '+fd(last) : 'Noch keine Einträge'}</div>
+    </div>
+  </a>`;
+}
+
+/* ============ Projektseite ============ */
+const TABS = [['kosten','Kosten','Kosten'],['doku','Dokumentation','Doku'],['gewinn','Gewinnermittlung','Gewinn'],['bericht','Abschlussbericht','Bericht']];
+function renderProjekt(p, tab){
+  const c = calc(p);
+  const body = tab==='kosten' ? renderKosten(p,c) : tab==='doku' ? renderDoku(p) : tab==='gewinn' ? renderGewinn(p,c) : renderBericht(p,c);
+  const facts = [
+    [p.objekt, p.lage].filter(Boolean).join(', '),
+    `<b>${m2(p.wohnflaeche)}</b>`,
+    p.zimmer ? `<b>${p.zimmer.toLocaleString('de-DE')}</b> Zimmer` : '',
+    p.baujahr ? `Baujahr <b>${p.baujahr}</b>` : '',
+    p.energie ? `Energieklasse <b>${p.energie}</b>` : '',
+    `Ankauf <b>${fd(p.ankauf)}</b>`,
+    p.verkauf ? `Verkauf <b>${fd(p.verkauf.datum)}</b>` : '',
+    `Eigenkapital <b>${e0(c.ek0)}</b>${c.ekAuto?' (berechnet)':''}`,
+  ].filter(Boolean);
+  return `
+  <a class="back" href="#start">${ICON.back} Alle Projekte</a>
+  <div class="phead">
+    <div>
+      <div class="loc">${p.stadtteil}, ${p.plz} ${p.ort}</div>
+      <h1>${esc(p.adresse)}</h1>
+      <div class="facts">${facts.map(x=>`<span>${x}</span>`).join('')}</div>
+    </div>
+    ${statusPill(p)}
+  </div>
+  <nav class="tabs" role="tablist" aria-label="Projektbereiche">${TABS.map(([k,l,sh])=>`<a class="tab" role="tab" aria-selected="${k===tab}" href="#${p.id}--${k}"><span class="l">${l}</span><span class="s">${sh}</span></a>`).join('')}</nav>
+  <section>${body}</section>`;
+}
+
+function renderKosten(p,c){
+  const done = p.status==='abgeschlossen';
+  const sel = state.filter;
+  const parts = BUCKETS.filter(b=>state.donut==='alle' || b.key!=='kaufpreis').map(b=>({...b, value:c.ist[b.key]}));
+  const tot = parts.reduce((s,x)=>s+x.value,0);
+  const donutCard = !p.kosten.length ? `<div class="card empty"><h2>Kostenverteilung</h2><p>Noch keine Rechnungen erfasst. Das Diagramm füllt sich mit der ersten Rechnung. Rechts stehen schon die Planwerte je Kategorie.</p></div>` : `<div class="card">
+    <div class="card-head"><h2>Kostenverteilung</h2>
+      <div class="seg" role="group" aria-label="Ansicht der Kostenverteilung">
+        <button data-act="donut" data-v="alle" aria-pressed="${state.donut==='alle'}">Alle Kosten</button>
+        <button data-act="donut" data-v="ohne" aria-pressed="${state.donut==='ohne'}">Ohne Kaufpreis</button>
+      </div>
+    </div>
+    <div class="donut-row">
+      <div class="donut">${donutSVG(parts,tot,sel)}<div class="ctr"><span class="l">${state.donut==='alle' ? (done?'Kosten gesamt':'Kosten bisher') : 'ohne Kaufpreis'}</span><span class="v">${e0(tot)}</span></div></div>
+      <ul class="legend ${sel!=='alle'?'dim':''}">${parts.map(pt=>`<li><button data-act="filter" data-key="${pt.key}" aria-pressed="${sel===pt.key}"><span class="sw" style="background:${pt.color}"></span><span>${pt.name}</span><span class="amt">${e0(pt.value)}</span><span class="shr">${pc(tot?pt.value/tot:0)}</span></button></li>`).join('')}</ul>
+    </div>
+    <p class="hint">Segment oder Zeile antippen filtert die Rechnungsliste.</p>
+  </div>`;
+
+  const budgetCard = `<div class="card">
+    <div class="hero-l">${done?'Kosten gesamt':'Kosten bisher'}</div>
+    <div class="hero-v num">${e0(c.istSum)}</div>
+    <div class="hero-s">Plan ${e0(c.planSum)} · ${done ? `Abweichung ${dl(c.istSum-c.planSum,false)}` : `${pc(c.istSum/c.planSum,0)} des Plans gebucht`}</div>
+    <div class="brows">${BUCKETS.map(b=>{
+      const i=c.ist[b.key], pl=c.plan[b.key], over=i>pl+0.5, w=pl?Math.min(100,i/pl*100):0;
+      return `<div><div class="brow-top"><span class="nm"><span class="sw" style="background:${b.color}"></span>${b.name}</span><span class="vals">${e0(i)} <span class="of">/ ${e0(pl)}</span></span></div><div class="meter ${over?'over':''}"><span style="width:${w}%"></span></div>${over?`<div class="overtag">▲ ${e0(i-pl)} über Plan</div>`:''}</div>`;
+    }).join('')}</div>
+    <div class="split">
+      <div class="split-h">Renovierung nach Material und Arbeit</div>
+      ${(c.mat+c.arb)>0 ? `${segbar([{name:'Material',value:c.mat,color:'var(--c4)',ink:'#0b0b0b'},{name:'Arbeit',value:c.arb,color:'var(--c4d)',ink:'#fff'}], .16)}
+      <div class="split-l"><span><i class="sw" style="background:var(--c4)"></i>Material ${e0(c.mat)}</span><span><i class="sw" style="background:var(--c4d)"></i>Arbeit ${e0(c.arb)}</span></div>
+      <p class="hint">${e0(c.proxy)} davon per Proxy aufgeteilt, weil die Rechnung Material und Lohn nicht getrennt ausweist.</p>` : '<p class="hint">Noch keine Renovierungsrechnungen.</p>'}
+    </div>
+  </div>`;
+
+  const list = p.kosten.map((k,i)=>({...k,i})).filter(k=>sel==='alle'||k.bucket===sel).sort((a,b)=>b.datum.localeCompare(a.datum)||b.i-a.i);
+  const chips = [['alle','Alle',p.kosten.length], ...BUCKETS.map(b=>[b.key,b.short,p.kosten.filter(k=>k.bucket===b.key).length])];
+  const invCard = `<div class="card">
+    <div class="card-head"><h2>Rechnungen</h2><span class="muted">${p.kosten.length} Positionen</span></div>
+    <div class="chips" role="group" aria-label="Nach Kategorie filtern">${chips.map(([k,l,n])=>`<button class="chip" data-act="filter" data-key="${k}" aria-pressed="${sel===k}">${k!=='alle'?`<i class="sw" style="width:8px;height:8px;background:${BMAP[k].color}"></i>`:''}${l} <span class="n">${n}</span></button>`).join('')}</div>
+    ${list.length ? `<ul class="inv">${list.map(k=>invRow(p,k)).join('')}</ul>` : '<p class="muted" style="padding:12px 0;border-bottom:1px solid var(--line);margin:0">Noch keine Rechnungen erfasst.</p>'}
+    <div class="inv-sum"><span>Summe${sel!=='alle'?' '+BMAP[sel].name:''}</span><span class="num">${e2(list.reduce((s,k)=>s+k.betrag,0))}</span></div>
+    <p class="hint">Neue Rechnung: PDF oder Foto im Claude-Chat schicken. Alle Beträge brutto.</p>
+  </div>`;
+  return `<div class="grid2">${donutCard}${budgetCard}</div>${invCard}`;
+}
+function invRow(p,k){
+  const b = BMAP[k.bucket];
+  let split = '';
+  if(k.split){
+    split = (k.split.material && k.split.arbeit) ? `Material ${e0(k.split.material)} · Arbeit ${e0(k.split.arbeit)}${k.split.proxy?' (Proxy)':''}` : (k.split.material ? 'Material' : 'Arbeit');
+  }
+  const beleg = k.beleg===false ? `<span class="nobeleg">Ohne Beleg, manuell erfasst</span>` : (k.beleg && k.beleg.url) ? `<a class="belegbtn" href="${esc(k.beleg.url)}" target="_blank" rel="noopener" title="${esc(k.beleg.pfad||'')}">${ICON.doc} Beleg öffnen</a>` : `<span class="nobeleg">Beleg fehlt</span>`;
+  return `<li><span class="dt">${fd(k.datum)}</span><div><div class="who">${esc(k.lieferant)}</div><div class="what">${esc(k.text)}</div></div><span class="amt">${e2(k.betrag)}</span>
+    <div class="meta"><span class="btag"><i style="background:${b.color}"></i>${b.short}</span>${split?`<span>${split}</span>`:''}${beleg}</div></li>`;
+}
+
+function renderDoku(p){
+  const items = p.timeline.map((t,i)=>({...t,i}));
+  const ordered = state.sort==='neu' ? [...items].reverse() : items;
+  const lastIdx = items.length-1;
+  const nF = items.reduce((s,t)=>s+t.fotos.length,0);
+  if(!items.length) return `<div class="card empty"><h2>Noch keine Einträge</h2><p>Für den ersten Eintrag die Besichtigungsfotos und ein paar Stichworte im Claude-Chat schicken. Er wird automatisch zum Projektstart.</p></div>`;
+  return `<div class="tl-tools"><span class="muted">${items.length} Einträge · ${nF} Fotos</span>
+    <div class="seg" role="group" aria-label="Sortierung">
+      <button data-act="sort" data-v="neu" aria-pressed="${state.sort==='neu'}">Neueste zuerst</button>
+      <button data-act="sort" data-v="alt" aria-pressed="${state.sort==='alt'}">Älteste zuerst</button>
+    </div></div>
+  <ol class="tl">${ordered.map(t=>{
+    const d = pd(t.datum);
+    const tag = t.typ==='start' ? 'Projektstart' : t.typ==='abschluss' ? 'Projektabschluss' : (p.status==='laufend' && t.i===lastIdx ? 'Aktuell' : '');
+    return `<li class="tl-item ${t.typ!=='verlauf'?'key':''}">
+      <div class="tl-date"><span class="d">${d.getDate()}</span><span class="m">${MON[d.getMonth()]}</span><span class="y">${d.getFullYear()}</span></div>
+      <div class="tl-rail"><span class="tl-dot"></span></div>
+      <div class="tl-body">${tag?`<span class="tl-tag">${tag}</span>`:''}<h3>${esc(t.titel)}</h3><p>${esc(t.text)}</p>
+        ${t.fotos.length ? `<div class="photos">${t.fotos.map((f,j)=>`<button class="ph" data-act="photo" data-p="${p.id}" data-e="${t.i}" data-i="${j}" aria-label="Foto vergrößern: ${f.cap}"><img data-foto="${p.id}/${f.id}_t" alt="${esc(f.cap)}"><span class="ph-cap">${esc(f.cap)}</span></button>`).join('')}</div>` : ''}
+      </div></li>`;
+  }).join('')}</ol>
+  <p class="hint">Neuer Eintrag: Fotos und ein paar Stichworte im Claude-Chat schicken. Der erste Eintrag mit Fotos ist der Projektstart, der Eintrag mit den Abschlussfotos der Projektabschluss. Beide landen im Abschlussbericht.</p>`;
+}
+
+function renderGewinn(p,c){
+  const done = p.status==='abgeschlossen';
+  const tile = (l,v,d) => `<div class="tile"><div class="l">${l}</div><div class="v num">${v}</div><div class="d">${d}</div></div>`;
+  const tiles = done ? [
+      tile('Gewinn vor Steuern', e0(c.gewinn), `Plan ${e0(c.planGewinn)} · ${dl(c.gewinn-c.planGewinn,true)}`),
+      tile('Marge auf Gesamtkosten', pc(c.marge), `Plan ${pc(c.planMarge)}`),
+      tile('Eigenkapitalrendite', pc(c.ek,0), `${pc(c.ekPa,0)} p.a. · EK ${e0(c.ek0)}`),
+      tile('Projektdauer', mo(c.dauer), `Plan ${mo(p.plan.dauerMonate)}`),
+    ] : [
+      tile('Erwarteter Gewinn vor Steuern', e0(c.planGewinn), 'Szenario goldene Mitte'),
+      tile('Erwartete Marge', pc(c.planMarge), 'auf Gesamtkosten'),
+      tile('Erwartete EK-Rendite', pc(c.planEk,0), `${pc(c.planEkPa,0)} p.a. · EK ${e0(c.ek0)}${c.ekAuto?' (berechnet)':''}`),
+      tile('Laufzeit seit Ankauf', mo(c.dauer), `Plan ${mo(p.plan.dauerMonate)}`),
+    ];
+
+  const head = done ? ['Position','Plan','Ist','Abweichung'] : ['Position','Plan','Ist bisher','Rest-Budget'];
+  let rows = '';
+  const dvm = x => x ? `<div class="dvm">${done?'':'Rest '}${x}</div>` : '';
+  const vkIst = done ? p.verkauf.preis : null;
+  rows += `<tr class="sum"><td>Verkaufspreis</td><td>${e0(c.vkPlan)}</td><td>${done?e0(vkIst)+dvm(dl(vkIst-c.vkPlan,true)):'offen'}</td><td>${done?dl(vkIst-c.vkPlan,true):''}</td></tr>`;
+  rows += `<tr class="grp"><td colspan="4">Kosten</td></tr>`;
+  BUCKETS.forEach(b=>{
+    const pl=c.plan[b.key], is=c.ist[b.key];
+    const last = done ? dl(is-pl,false) : (pl-is >= -0.5 ? e0(pl-is) : `<span class="delta neg">${sgn(pl-is,e0)}</span>`);
+    rows += `<tr><td><span class="bn"><span class="sw" style="background:${b.color}"></span><span class="nm-l">${b.name}</span><span class="nm-s">${b.short}</span></span></td><td>${e0(pl)}</td><td>${e0(is)}${dvm(last)}</td><td>${last}</td></tr>`;
+    p.plan.positionen.filter(x=>x.bucket===b.key && b.key!=='kaufpreis').forEach(x=>{
+      rows += `<tr class="sub"><td>${x.name}</td><td>${e0(x.betrag)}</td><td></td><td></td></tr>`;
+    });
+    if(b.key==='renovierung'){
+      rows += `<tr class="sub"><td>Ist davon Material</td><td></td><td>${e0(c.mat)}</td><td></td></tr><tr class="sub"><td>Ist davon Arbeit</td><td></td><td>${e0(c.arb)}</td><td></td></tr>`;
+    }
+  });
+  rows += `<tr class="sum"><td>Summe Kosten</td><td>${e0(c.planSum)}</td><td>${e0(c.istSum)}${dvm(done?dl(c.istSum-c.planSum,false):e0(c.planSum-c.istSum))}</td><td>${done?dl(c.istSum-c.planSum,false):e0(c.planSum-c.istSum)}</td></tr>`;
+  rows += `<tr class="res"><td>Gewinn vor Steuern</td><td>${e0(c.planGewinn)}</td><td>${done?e0(c.gewinn)+dvm(dl(c.gewinn-c.planGewinn,true)):'nach Verkauf'}</td><td>${done?dl(c.gewinn-c.planGewinn,true):''}</td></tr>`;
+  rows += `<tr class="kpi"><td>Marge auf Gesamtkosten</td><td>${pc(c.planMarge)}</td><td>${done?pc(c.marge):''}</td><td></td></tr>`;
+  rows += `<tr class="kpi"><td><span class="nm-l">Eigenkapitalrendite</span><span class="nm-s">EK-Rendite</span></td><td>${pc(c.planEk)}</td><td>${done?pc(c.ek):''}</td><td></td></tr>`;
+
+  const sz = c.szen;
+  const szen = `<div class="card" style="margin-top:16px">
+    <div class="card-head" style="margin-bottom:10px"><h2>Verkaufsszenarien aus der Ankaufskalkulation</h2></div>
+    <div class="szen">${[['gering','Gering'],['mitte','Goldene Mitte'],['hoch','Hoch']].map(([k,l])=>`<div class="${k==='mitte'?'on':''}"><div class="t">${l}${k==='mitte'?' · Planbasis':''}</div><div class="p">${e0(sz[k].preis)} · ${e0(sz[k].qm)}/m²</div><div class="g num">${e0(sz[k].gewinn)}</div><div class="p">Marge ${pc(sz[k].marge)}</div></div>`).join('')}</div>
+    ${done ? `<p class="hint">Tatsächlicher Verkauf: ${e0(p.verkauf.preis)} · ${e0(p.verkauf.preis/p.wohnflaeche)}/m²</p>` : ''}
+  </div>`;
+
+  return `<div class="tiles">${tiles.join('')}</div>
+  <div class="card"><div class="card-head"><h2>${done?'Plan und Ist':'Erwartung beim Ankauf und Stand heute'}</h2><span class="muted">Planwerte: ${p.plan.quelle}</span></div>
+    <div class="tablewrap"><table class="gw"><thead><tr>${head.map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>${rows}</tbody></table></div>
+  </div>
+  ${szen}
+  <p class="foot">Gewinn vor Steuern = Verkaufspreis minus Kaufpreis, Kaufnebenkosten, Finanzierungskosten, Renovierungskosten und weitere Kosten. Finanzierungskosten sind Zinsen und Bearbeitungsgebühr, ohne Tilgung. Marge = Gewinn vor Steuern geteilt durch Summe Kosten. EK-Rendite = Gewinn vor Steuern geteilt durch eingesetztes Eigenkapital, p.a. linear auf 12 Monate hochgerechnet${c.ekAuto?' (Eigenkapital vorläufig berechnet: Plan-Gesamtkosten minus Darlehen)':''}. Projektdauer = Beurkundung Ankauf bis Beurkundung Verkauf. Alle Beträge brutto.</p>`;
+}
+
+function renderBericht(p,c){
+  if(p.status!=='abgeschlossen'){
+    return `<div class="card empty">
+      <h2>Abschlussbericht noch nicht verfügbar</h2>
+      <p>Der Bericht entsteht automatisch, sobald Verkaufspreis, Verkaufsdatum und ein Timeline-Eintrag mit Abschlussfotos erfasst sind. Er zeigt die Vorher- und Nachher-Fotos und die Gewinnermittlung auf Basis der Ist-Werte.</p>
+    </div>`;
+  }
+  const start = p.timeline.find(t=>t.typ==='start'), end = p.timeline.find(t=>t.typ==='abschluss');
+  const si = p.timeline.indexOf(start), ei = p.timeline.indexOf(end);
+  const pairs = start.fotos.map((f,j)=>{ const k = end.fotos.findIndex(g=>g.raum===f.raum); return k<0 ? null : {cap:esc(f.cap), a:p.id+'/'+f.id, b:p.id+'/'+end.fotos[k].id}; }).filter(Boolean).slice(0,4);
+  const vk = p.verkauf.preis;
+  const barParts = [...BUCKETS.map(b=>({name:b.name, value:c.ist[b.key], color:b.color, ink:b.ink})), {name:'Gewinn vor Steuern', value:Math.max(0,c.gewinn), color:'var(--c6)', ink:'#fff'}];
+  const facts = [['Objekt',`${p.objekt}, ${p.lage}`],['Wohnfläche',m2(p.wohnflaeche)],['Zimmer',p.zimmer],['Baujahr',p.baujahr],['Ankauf',fd(p.ankauf)],['Verkauf',fd(p.verkauf.datum)],['Projektdauer',mo(c.dauer)],['Verkaufspreis je m²',e0(vk/p.wohnflaeche)]];
+  return `<div class="op-tools"><span class="muted">Für Banken und als Projektdokumentation. A4, als PDF speicherbar.</span><button class="btn" data-act="print">${ICON.print} Als PDF speichern</button></div>
+  <article class="sheet" id="sheet">
+    <header class="sh-top">
+      <div class="sh-brand"><span class="mark">R&amp;H</span><div><b>Rehrmann &amp; Harms Immobilien</b><span>Fix &amp; Flip · Rhein-Ruhr</span></div></div>
+      <div class="sh-doc"><b>Projektabschlussbericht</b><span>Stand ${fd(new Date())}</span></div>
+    </header>
+    <div class="sh-title"><div class="loc">${p.stadtteil}, ${p.plz} ${p.ort}</div><h2>${p.adresse}</h2></div>
+    <dl class="sh-facts">${facts.map(([k,v])=>`<div><dt>${k}</dt><dd>${v}</dd></div>`).join('')}</dl>
+    <h3 class="sh-h">Vorher und Nachher</h3>
+    <div class="sh-pairs">${pairs.map(x=>`<figure><figcaption>${x.cap}</figcaption><div class="ba"><img data-foto="${x.a}" alt="${x.cap} vorher"><span>Vorher</span></div><div class="ba after"><img data-foto="${x.b}" alt="${x.cap} nachher"><span>Nachher</span></div></figure>`).join('')}</div>
+    <h3 class="sh-h">Gewinnermittlung</h3>
+    <div class="sh-gw">
+      <table><tbody>
+        <tr class="vk"><td>Verkaufspreis</td><td>${e0(vk)}</td></tr>
+        ${BUCKETS.map(b=>`<tr><td>abzüglich ${b.name}</td><td>−${e0(c.ist[b.key])}</td></tr>`).join('')}
+        <tr class="res"><td>Gewinn vor Steuern</td><td>${e0(c.gewinn)}</td></tr>
+      </tbody></table>
+      <div class="sh-kpis">
+        <div class="sh-kpi big"><div class="l">Gewinn vor Steuern</div><div class="v">${e0(c.gewinn)}</div></div>
+        <div class="sh-kpi"><div class="l">Marge auf Gesamtkosten</div><div class="v">${pc(c.marge)}</div></div>
+        <div class="sh-kpi"><div class="l">Projektdauer</div><div class="v">${mo(c.dauer)}</div></div>
+      </div>
+    </div>
+    <div class="sh-bar">
+      <h3 class="sh-h" style="margin-top:4px">Verwendung des Verkaufspreises</h3>
+      ${segbar(barParts, .06)}
+      <div class="sh-legend">${barParts.map(x=>`<span><i class="sw" style="background:${x.color}"></i>${x.name} ${e0(x.value)}</span>`).join('')}</div>
+    </div>
+    <footer class="sh-foot"><span>Alle Beträge brutto in Euro. Finanzierungskosten: Zinsen und Bearbeitungsgebühr. Marge = Gewinn vor Steuern geteilt durch Gesamtkosten.</span><span>Rehrmann &amp; Harms Immobilien eGbR · rh.immo@outlook.com</span></footer>
+  </article>`;
+}
+
+/* ============ Neues Projekt (manuell) ============ */
+const NEU = {
+  objekt:[
+    {id:'adresse', label:'Straße und Hausnummer', req:1, ph:'z. B. Musterstraße 1'},
+    {id:'plz', label:'PLZ', ph:'45127'},
+    {id:'ort', label:'Ort', req:1, ph:'Essen'},
+    {id:'stadtteil', label:'Stadtteil', ph:'Rüttenscheid'},
+    {id:'lage', label:'Lage im Haus', ph:'EG rechts'},
+    {id:'wohnflaeche', label:'Wohnfläche', req:1, num:1, unit:'m²'},
+    {id:'zimmer', label:'Zimmer', num:1},
+    {id:'baujahr', label:'Baujahr', num:1},
+    {id:'energie', label:'Energieklasse', ph:'B'},
+  ],
+  plan:[
+    {id:'phase', label:'Status', type:'select', opts:['Ankauf läuft','In Renovierung','In Vermarktung']},
+    {id:'ankauf', label:'Ankauf (Beurkundung)', req:1, type:'date'},
+    {id:'kaufpreis', label:'Kaufpreis', req:1, num:1, unit:'€'},
+    {id:'reno', label:'Renovierung je m²', req:1, num:1, unit:'€/m²', def:700},
+    {id:'vkg', label:'Verkaufspreis je m², gering', req:1, num:1, unit:'€/m²'},
+    {id:'vkh', label:'Verkaufspreis je m², hoch', req:1, num:1, unit:'€/m²'},
+    {id:'hausgeld', label:'Hausgeld', req:1, num:1, unit:'€/Monat'},
+    {id:'ek', label:'Eigenkapital', num:1, unit:'€', hint:'Leer lassen: Plan-Gesamtkosten minus Darlehen'},
+  ],
+  annahmen:[
+    {id:'notar', label:'Notar und Grundbuch', num:1, unit:'%', def:1.5},
+    {id:'makler', label:'Makler', num:1, unit:'%', def:3.57},
+    {id:'grest', label:'Grunderwerbsteuer', num:1, unit:'%', def:6.5},
+    {id:'finanteil', label:'Finanzierung vom Kaufpreis', num:1, unit:'%', def:100},
+    {id:'zins', label:'Zins p.a.', num:1, unit:'%', def:5.45},
+    {id:'zinsmon', label:'Zinsen berechnet für', num:1, unit:'Monate', def:12},
+    {id:'bearb', label:'Bearbeitungsgebühr', num:1, unit:'%', def:1.5},
+    {id:'puffer', label:'Sicherheitspuffer Renovierung', num:1, unit:'%', def:15},
+    {id:'strom', label:'Strom und Heizung', num:1, unit:'€/Monat', def:25},
+    {id:'dauer', label:'Projektdauer', num:1, unit:'Monate', def:8},
+    {id:'staging', label:'Homestaging', num:1, unit:'€', def:3000},
+  ]
+};
+const NEU_ALL = [...NEU.objekt, ...NEU.plan, ...NEU.annahmen];
+const nf = v => Number(v).toLocaleString('de-DE',{maximumFractionDigits:2});
+function parseNum(raw){
+  let s = String(raw).replace(/[\s€%]/g,'');
+  if(s==='') return null;
+  if(s.includes(',')) s = s.replace(/\./g,'').replace(',','.');
+  else if(!/^\d+\.\d{1,2}$/.test(s)) s = s.replace(/\./g,'');
+  const n = Number(s);
+  return isFinite(n) ? n : NaN;
+}
+const isoToday = () => { const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); };
+function fieldHTML(f){
+  let input;
+  if(f.type==='date') input = `<input id="f-${f.id}" name="${f.id}" type="date">`;
+  else if(f.type==='select') input = `<select id="f-${f.id}" name="${f.id}">${f.opts.map(o=>`<option>${o}</option>`).join('')}</select>`;
+  else input = `<input id="f-${f.id}" name="${f.id}" type="text" ${f.num?'inputmode="decimal"':''} placeholder="${f.ph||''}" value="${f.def!=null?nf(f.def):''}" autocomplete="off">`;
+  return `<div class="fld" data-f="${f.id}"><label for="f-${f.id}">${f.label}${f.req?' <span class="req" aria-hidden="true">*</span>':''}</label><div class="inp">${input}${f.unit?`<span class="u">${f.unit}</span>`:''}</div>${f.hint?`<span class="fh">${f.hint}</span>`:''}<span class="em" hidden></span></div>`;
+}
+function renderNeu(){
+  return `
+  <a class="back" href="#start">${ICON.back} Alle Projekte</a>
+  <div class="phead"><div><div class="loc">Manuelle Anlage</div><h1>Neues Projekt</h1>
+    <p class="sub">Die wichtigsten Daten zum Anlegen. Die Annahmen sind mit den Standardwerten aus eurer Fix-and-Flip-Excel vorbelegt, die Planrechnung folgt derselben Logik. Pflichtfelder sind mit * markiert.</p></div></div>
+  <form id="neu-form" novalidate>
+    <div class="form-grid">
+      <div>
+        <section class="fsec"><h2>Objekt</h2><div class="fields">${NEU.objekt.map(fieldHTML).join('')}</div></section>
+        <section class="fsec"><h2>Ankauf und Plan</h2><div class="fields">${NEU.plan.map(fieldHTML).join('')}</div></section>
+        <details class="fsec"><summary><span>Annahmen <span class="muted">Standard aus der Excel</span></span></summary><div class="fields">${NEU.annahmen.map(fieldHTML).join('')}</div></details>
+      </div>
+      <aside class="fsec sumcard" aria-live="polite">
+        <h2>Planrechnung</h2>
+        <div id="neu-sum"></div>
+        <div class="form-actions"><button class="btn" type="submit">Text für Claude erzeugen</button></div>
+        <p class="hint">Den Text in den Claude-Chat einfügen. Claude legt das Projekt an und die OneDrive-Ordner dazu.</p>
+      </aside>
+    </div>
+  </form>`;
+}
+function readNeu(){
+  const form = document.getElementById('neu-form'); const v = {};
+  NEU_ALL.forEach(f => {
+    const raw = form.elements[f.id].value.trim();
+    v[f.id] = f.num ? parseNum(raw) : raw;
+  });
+  NEU.annahmen.forEach(f => { if(v[f.id]==null || isNaN(v[f.id])) v[f.id] = f.def; });
+  return v;
+}
+function buildProjekt(v){
+  const kp = v.kaufpreis, qm = v.wohnflaeche, darlehen = kp*v.finanteil/100, reno = qm*v.reno, mtl = (v.hausgeld||0)+v.strom;
+  const pos = [
+    {bucket:'kaufpreis', name:'Kaufpreis', betrag:kp},
+    {bucket:'knk', name:`Notar und Grundbuch (${nf(v.notar)} %)`, betrag:r2(kp*v.notar/100)},
+    {bucket:'knk', name:`Makler (${nf(v.makler)} %)`, betrag:r2(kp*v.makler/100)},
+    {bucket:'knk', name:`Grunderwerbsteuer (${nf(v.grest)} %)`, betrag:r2(kp*v.grest/100)},
+    {bucket:'finanzierung', name:`Zinsen (${nf(v.zins)} % p.a. auf ${nf(v.finanteil)} % Kaufpreis, ${nf(v.zinsmon)} Monate)`, betrag:r2(darlehen*v.zins/100/12*v.zinsmon)},
+    {bucket:'finanzierung', name:`Bearbeitungsgebühr (${nf(v.bearb)} %)`, betrag:r2(darlehen*v.bearb/100)},
+    {bucket:'renovierung', name:`Renovierung (${nf(v.reno)} €/m²)`, betrag:r2(reno)},
+    {bucket:'renovierung', name:`Sicherheitspuffer (${nf(v.puffer)} %)`, betrag:r2(reno*v.puffer/100)},
+    {bucket:'weiteres', name:`Hausgeld, Strom, Heizung (${nf(mtl)} €/Monat, ${nf(v.dauer)} Monate)`, betrag:r2(mtl*v.dauer)},
+    {bucket:'weiteres', name:'Homestaging', betrag:v.staging},
+  ];
+  const mq = (v.vkg+v.vkh)/2;
+  const planSum = r2(pos.reduce((s,x)=>s+x.betrag,0));
+  const ekAuto = v.ek==null || isNaN(v.ek);
+  return {
+    id:'', adresse:v.adresse, plz:v.plz, ort:v.ort, stadtteil:v.stadtteil || v.ort,
+    objekt:'Eigentumswohnung', lage:v.lage, wohnflaeche:qm, zimmer:v.zimmer, baujahr:v.baujahr, energie:v.energie,
+    status:'laufend', phase:v.phase, neu:true,
+    eigenkapital: ekAuto ? r2(planSum-darlehen) : v.ek, ekHinweis: ekAuto ? 'berechnet: Plan-Gesamtkosten minus Darlehen' : '',
+    ankauf: v.ankauf || isoToday(), verkauf:null,
+    plan:{quelle:'manuell angelegt, Logik der Fix-and-Flip-Excel', dauerMonate:v.dauer, darlehen:darlehen,
+      verkauf:{gering:{preis:r2(qm*v.vkg), qm:v.vkg}, mitte:{preis:r2(qm*mq), qm:mq}, hoch:{preis:r2(qm*v.vkh), qm:v.vkh}},
+      positionen:pos},
+    kosten:[], timeline:[]
+  };
+}
+function updateNeuSummary(){
+  const box = document.getElementById('neu-sum'); if(!box) return;
+  const v = readNeu();
+  if(!['kaufpreis','wohnflaeche','vkg','vkh'].every(k=>v[k]>0)){
+    box.innerHTML = '<p class="muted" style="margin:0">Die Planrechnung erscheint, sobald Kaufpreis, Wohnfläche und beide Verkaufspreise je m² eingetragen sind.</p>';
+    return;
+  }
+  const p = buildProjekt(v), c = calc(p), ekAutoN = !!p.ekHinweis;
+  box.innerHTML = BUCKETS.map(b=>`<div class="sumrow"><span class="nm"><span class="sw" style="background:${b.color}"></span>${b.name}</span><b>${e0(c.plan[b.key])}</b></div>`).join('')
+    + `<div class="sumrow t"><span>Summe Kosten</span><b>${e0(c.planSum)}</b></div>`
+    + `<div class="sum-h">Gewinn vor Steuern</div>`
+    + [['gering','Gering'],['mitte','Goldene Mitte'],['hoch','Hoch']].map(([k,l])=>`<div class="sumrow ${k==='mitte'?'on':''}"><span>${l} <span class="muted">${e0(c.szen[k].preis)}</span></span><b>${e0(c.szen[k].gewinn)} · ${pc(c.szen[k].marge)}</b></div>`).join('')
+    + `<div class="sumrow" style="border-bottom:0"><span>Eigenkapital${ekAutoN?' <span class="muted">(berechnet)</span>':''}</span><b>${e0(p.eigenkapital)}</b></div>`;
+}
+function submitNeu(){
+  const form = document.getElementById('neu-form');
+  const v = readNeu();
+  const errs = {};
+  NEU_ALL.filter(f=>f.req).forEach(f=>{ const x=v[f.id]; if(x==null || x==='' || (f.num && !(x>0))) errs[f.id] = 'Bitte eintragen.'; });
+  NEU_ALL.filter(f=>f.num && !f.req).forEach(f=>{ if(Number.isNaN(v[f.id])) errs[f.id] = 'Bitte eine Zahl eintragen.'; });
+  if(!errs.vkh && !errs.vkg && v.vkh < v.vkg) errs.vkh = 'Muss mindestens so hoch sein wie der Wert für gering.';
+  form.querySelectorAll('.fld').forEach(el=>{ const id=el.dataset.f, em=el.querySelector('.em'); el.classList.toggle('err', !!errs[id]); em.hidden = !errs[id]; em.textContent = errs[id]||''; });
+  const first = Object.keys(errs)[0];
+  if(first){ const det = form.querySelector('details'); if(NEU.annahmen.some(f=>f.id===first)) det.open = true; form.elements[first].focus(); return; }
+  const p = buildProjekt(v), c = calc(p);
+  const z = (k, x) => x==null || x==='' || Number.isNaN(x) ? '' : `${k}: ${x}\n`;
+  const nfx = x => x==null || Number.isNaN(x) ? '' : nf(x);
+  let txt = 'Neues Projekt in der Projektübersicht anlegen.\n\n';
+  txt += z('Adresse', v.adresse) + z('PLZ', v.plz) + z('Ort', v.ort) + z('Stadtteil', v.stadtteil) + z('Lage im Haus', v.lage);
+  txt += z('Wohnfläche m²', nfx(v.wohnflaeche)) + z('Zimmer', nfx(v.zimmer)) + z('Baujahr', v.baujahr ? String(v.baujahr) : '') + z('Energieklasse', v.energie);
+  txt += z('Status', v.phase) + z('Ankauf (Beurkundung)', v.ankauf ? fd(v.ankauf) : '') + z('Eigenkapital', v.ek>0 ? e2(v.ek) : 'nicht angegeben, bitte berechnen');
+  txt += '\nPlanwerte:\n' + p.plan.positionen.map(x => `${x.name}: ${e2(x.betrag)}`).join('\n');
+  txt += `\nVerkaufspreis je m² gering / hoch: ${nf(v.vkg)} € / ${nf(v.vkh)} €`;
+  txt += `\nProjektdauer: ${nf(v.dauer)} Monate`;
+  txt += `\n\nErgebnis Planrechnung: Gesamtkosten ${e2(c.planSum)}, Gewinn goldene Mitte ${e2(c.szen.mitte.gewinn)} (Marge ${pc(c.szen.mitte.marge)}).`;
+  openModal('Text für Claude', `<p>Kopieren und im Claude-Chat einfügen.</p><textarea class="copybox" id="copytext" readonly>${esc(txt)}</textarea><button class="btn ghost" type="button" data-act="copy">Text kopieren</button>`);
+}
+document.addEventListener('input', e=>{ if(e.target.closest && e.target.closest('#neu-form')){ const fld=e.target.closest('.fld'); if(fld){ fld.classList.remove('err'); fld.querySelector('.em').hidden=true; } updateNeuSummary(); } });
+document.addEventListener('change', e=>{ if(e.target.closest && e.target.closest('#neu-form')) updateNeuSummary(); });
+document.addEventListener('submit', e=>{ if(e.target.id==='neu-form'){ e.preventDefault(); submitNeu(); } });
+
+/* ============ Routing und Interaktion ============ */
+function parseRoute(){
+  const h = decodeURIComponent(location.hash.slice(1));
+  if(!h || h==='start') return {view:'start'};
+  if(h==='neu') return {view:'neu'};
+  const [id, tab] = h.split('--');
+  const p = PROJEKTE.find(x=>x.id===id);
+  if(!p) return {view:'start'};
+  return {view:'projekt', p, tab: TABS.some(t=>t[0]===tab) ? tab : 'kosten'};
+}
+let lastProject = null;
+function render(){
+  const r = parseRoute();
+  const app = document.getElementById('app');
+  if(!KEY) return;
+  app.innerHTML = r.view==='start' ? renderStart() : r.view==='neu' ? renderNeu() : renderProjekt(r.p, r.tab);
+  if(r.view==='neu') updateNeuSummary();
+  hydrateFotos();
+}
+window.addEventListener('hashchange', ()=>{
+  if(!KEY) return;
+  const r = parseRoute();
+  const pid = r.p ? r.p.id : null;
+  if(pid !== lastProject){ state.filter='alle'; window.scrollTo(0,0); }
+  else { const tabs = document.querySelector('.tabs'); if(tabs && window.scrollY > tabs.offsetTop) window.scrollTo(0, tabs.offsetTop-53); }
+  lastProject = pid;
+  render();
+});
+function openModal(title, html){
+  document.getElementById('m-t').textContent = title;
+  document.getElementById('m-b').innerHTML = html;
+  document.getElementById('modal').classList.add('open');
+}
+function showLb(){
+  const f = LB.fotos[LB.i], img = document.getElementById('lb-img'), want = LB.i;
+  img.removeAttribute('src');
+  fotoURL(f.key).then(u => { if(LB.i === want) img.src = u; });
+  document.getElementById('lb-img').alt = f.cap;
+  document.getElementById('lb-cap').textContent = `${f.cap} · ${LB.i+1} von ${LB.fotos.length}`;
+}
+document.addEventListener('click', e=>{
+  if(e.target.id==='lb'){ document.getElementById('lb').classList.remove('open'); return; }
+  if(e.target.id==='modal'){ document.getElementById('modal').classList.remove('open'); return; }
+  const t = e.target.closest('[data-act]'); if(!t) return;
+  const a = t.dataset.act;
+  if(a==='donut'){ state.donut = t.dataset.v; if(state.donut==='ohne' && state.filter==='kaufpreis') state.filter='alle'; render(); }
+  else if(a==='filter'){ const k = t.dataset.key; state.filter = (k==='alle' || state.filter===k) ? 'alle' : k; render(); }
+  else if(a==='sort'){ state.sort = t.dataset.v; render(); }
+  else if(a==='photo'){
+    const p = PROJEKTE.find(x=>x.id===t.dataset.p), ei = +t.dataset.e, entry = p.timeline[ei];
+    LB = {fotos: entry.fotos.map(f=>({cap:`${entry.titel}, ${f.cap}`, key:p.id+'/'+f.id})), i:+t.dataset.i};
+    showLb(); document.getElementById('lb').classList.add('open');
+  }
+  else if(a==='lb-close'){ document.getElementById('lb').classList.remove('open'); }
+  else if(a==='lb-prev'){ LB.i = (LB.i-1+LB.fotos.length)%LB.fotos.length; showLb(); }
+  else if(a==='lb-next'){ LB.i = (LB.i+1)%LB.fotos.length; showLb(); }
+  else if(a==='logout'){ ls.del('rh-key'); ls.del('rh-salt'); KEY = null; PROJEKTE = []; INDEX = null; FOTO_CACHE.clear(); location.hash = 'start'; showLock(); }
+  else if(a==='copy'){
+    const ta = document.getElementById('copytext'); ta.select();
+    const done = () => { t.textContent = 'Kopiert'; };
+    if(navigator.clipboard) navigator.clipboard.writeText(ta.value).then(done, () => { try{ document.execCommand('copy'); done(); }catch(x){} });
+    else { try{ document.execCommand('copy'); done(); }catch(x){} }
+  }
+  else if(a==='m-close'){ document.getElementById('modal').classList.remove('open'); }
+  else if(a==='print'){
+    if(window.self !== window.top){
+      openModal('Als PDF speichern', '<p>In dieser Vorschau sperrt der Browser den Druckdialog. In der GitHub-Version öffnet der Button den Druckdialog. Dort „Als PDF speichern“ wählen. Das Layout ist auf A4 eingestellt.</p>');
+    } else { try{ window.print(); }catch(err){} }
+  }
+});
+document.addEventListener('keydown', e=>{
+  const lb = document.getElementById('lb');
+  if(e.key==='Escape'){ lb.classList.remove('open'); document.getElementById('modal').classList.remove('open'); }
+  if(lb.classList.contains('open')){
+    if(e.key==='ArrowLeft'){ LB.i=(LB.i-1+LB.fotos.length)%LB.fotos.length; showLb(); }
+    if(e.key==='ArrowRight'){ LB.i=(LB.i+1)%LB.fotos.length; showLb(); }
+  }
+});
+const tip = document.getElementById('tip');
+document.addEventListener('pointermove', e=>{
+  const t = e.target.closest ? e.target.closest('[data-tip]') : null;
+  if(!t || e.pointerType==='touch'){ tip.hidden = true; return; }
+  const [n,v] = t.dataset.tip.split('|');
+  tip.innerHTML = `<b>${n}</b><span>${v}</span>`;
+  tip.hidden = false;
+  const x = Math.min(e.clientX+14, window.innerWidth - tip.offsetWidth - 8);
+  tip.style.left = x+'px'; tip.style.top = (e.clientY+16)+'px';
+});
+document.addEventListener('pointerleave', ()=>{ tip.hidden = true; });
+boot();
+</script>
+</body>
+</html>
