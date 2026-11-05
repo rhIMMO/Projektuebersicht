@@ -166,25 +166,34 @@ KATEGORIEN = {"kaufpreis": "Kaufpreis", "knk": "Kaufnebenkosten", "finanzierung"
               "renovierung": "Renovierung", "weiteres": "Weiteres"}
 
 
-def dateiname(datum, bucket, inhalt, endung="pdf"):
-    """Einheitlicher Belegname: JJJJMMTT_Kategorie_Inhalt.endung"""
+RECHTSFORMEN = r"\b(gmbh|mbh|ag|kg|ug|gbr|egbr|ohg|e\.?\s?k\.?|e\.?\s?v\.?|co\.?|haftungsbeschraenkt|inh\.?)\b"
+
+
+def _woerter(text):
+    import re
+    t = text.strip()
+    for a, b in (("Ä", "Ae"), ("Ö", "Oe"), ("Ü", "Ue"), ("ä", "ae"), ("ö", "oe"), ("ü", "ue"), ("ß", "ss")):
+        t = t.replace(a, b)
+    return [w for w in re.split(r"[^A-Za-z0-9]+", t) if w]
+
+
+def dateiname(datum, bucket, lieferant, inhalt, endung="pdf"):
+    """Einheitlicher Belegname: JJJJMMTT_Kategorie_Lieferant-Inhalt.endung"""
     import re, datetime
     tag = datetime.date.fromisoformat(datum).strftime("%Y%m%d")  # bricht bei ungültigem Datum ab
     if bucket not in KATEGORIEN:
         sys.exit(f"Unbekannte Kategorie {bucket}. Erlaubt: {', '.join(KATEGORIEN)}")
-    t = inhalt.strip()
-    for a, b in (("Ä", "Ae"), ("Ö", "Oe"), ("Ü", "Ue"), ("ä", "ae"), ("ö", "oe"), ("ü", "ue"), ("ß", "ss")):
-        t = t.replace(a, b)
-    woerter = [w for w in re.split(r"[^A-Za-z0-9]+", t) if w]
-    if not woerter:
-        sys.exit("Inhalt fehlt.")
-    teil = "-".join(w[0].upper() + w[1:] for w in woerter)[:40].rstrip("-")
+    lf = re.sub(RECHTSFORMEN, " ", lieferant.replace("&", " "), flags=re.I)
+    lw, iw = _woerter(lf)[:3], _woerter(inhalt)[:4]
+    if not lw or not iw:
+        sys.exit("Lieferant und Inhalt werden gebraucht.")
+    teil = "-".join(w[0].upper() + w[1:] for w in lw + iw)[:50].rstrip("-")
     return f"{tag}_{KATEGORIEN[bucket]}_{teil}.{endung.lower().lstrip('.')}"
 
 
 if __name__ == "__main__":
-    if len(sys.argv) >= 5 and sys.argv[1] == "dateiname":
-        print(dateiname(sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[5] if len(sys.argv) > 5 else "pdf"))
+    if len(sys.argv) >= 6 and sys.argv[1] == "dateiname":
+        print(dateiname(sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[5], sys.argv[6] if len(sys.argv) > 6 else "pdf"))
         sys.exit(0)
     if len(sys.argv) < 2:
         sys.exit(__doc__)
