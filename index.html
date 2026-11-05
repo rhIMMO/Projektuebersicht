@@ -1008,7 +1008,7 @@ const nowLocal = () => { const d=new Date(), z=n=>String(n).padStart(2,'0'); ret
 async function gh(path, opts){
   opts = opts || {};
   const r = await fetch('https://api.github.com/repos/'+REPO+(path?'/'+path:''), Object.assign({cache:'no-store'}, opts, {headers:{'Accept':'application/vnd.github+json','Authorization':'Bearer '+ghToken(),'X-GitHub-Api-Version':'2022-11-28'}}));
-  if(!r.ok){ const e = new Error('GitHub antwortet mit '+r.status); e.status = r.status; throw e; }
+  if(!r.ok){ let m = ''; try { m = (await r.json()).message || ''; } catch(x){} const e = new Error('GitHub antwortet mit '+r.status+(m?' ('+m+')':'')); e.status = r.status; e.gh = m; throw e; }
   return r.status === 204 ? null : r.json();
 }
 async function encBytes(bytes){
@@ -1174,14 +1174,16 @@ document.addEventListener('click', e=>{
     if(ghToken()) editDialog(p); else tokenDialog(p.id);
   }
   else if(a==='token-save'){
-    const v = document.getElementById('gh-token').value.trim(), err = document.getElementById('tok-err');
+    const v = document.getElementById('gh-token').value.replace(/[^\x21-\x7E]/g, ''), err = document.getElementById('tok-err');
     if(!v){ err.textContent = 'Bitte den Schlüssel einfügen.'; return; }
+    const form = /^github_pat_[A-Za-z0-9_]{40,}$/.test(v) || /^ghp_[A-Za-z0-9]{30,}$/.test(v);
+    if(!form){ err.textContent = `Das sieht nicht wie ein GitHub-Schlüssel aus. Er muss mit github_pat_ beginnen und ist etwa 93 Zeichen lang. Eingefügt: ${v.length} Zeichen, Anfang „${esc(v.slice(0,11))}“.`; return; }
     ls.set('rh-gh-token', v); t.disabled = true; t.textContent = 'Prüfe …';
     gh('').then(r => {
       if(!r.permissions || !r.permissions.push) throw Object.assign(new Error('keine Schreibrechte'), {status:403});
       editDialog(PROJEKTE.find(x => x.id === t.dataset.p));
     }).catch(x => { ls.del('rh-gh-token'); t.disabled = false; t.textContent = 'Schlüssel speichern';
-      err.textContent = x.status === 401 ? 'Schlüssel ungültig.' : x.status === 404 ? 'Kein Zugriff auf das Repo Projektuebersicht.' : x.status === 403 ? 'Der Schlüssel hat keine Schreibrechte (Contents: Read and write).' : 'Prüfung fehlgeschlagen: '+x.message; });
+      err.textContent = x.status === 401 ? `GitHub lehnt den Schlüssel ab (${esc(x.gh || 'Bad credentials')}). Eingefügt: ${v.length} Zeichen. Meist war der Schlüssel unvollständig kopiert. Bitte auf GitHub neu erzeugen und mit dem Kopier-Symbol neben dem Schlüssel kopieren.` : x.status === 404 ? 'Kein Zugriff auf das Repo Projektuebersicht.' : x.status === 403 ? 'Der Schlüssel hat keine Schreibrechte (Contents: Read and write).' : 'Prüfung fehlgeschlagen: '+x.message; });
   }
   else if(a==='token-del'){ ls.del('rh-gh-token'); openModal('Schlüssel entfernt', '<p>Der GitHub-Schlüssel ist auf diesem Gerät gelöscht.</p>'); }
   else if(a==='logout'){ ls.del('rh-key'); ls.del('rh-salt'); KEY = null; RAW = null; PROJEKTE = []; INDEX = null; FOTO_CACHE.clear(); location.hash = 'start'; showLock(); }
