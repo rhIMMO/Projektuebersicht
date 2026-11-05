@@ -1072,8 +1072,9 @@ function editDialog(p){
       ${rg ? `<label class="chk" style="display:flex;gap:8px;font-size:14px;color:var(--ink-2)"><input type="checkbox" id="e-knkist" ${rg.knkVollstaendig?'checked':''}> Alle Kaufnebenkosten sind als Rechnung erfasst. Eigenkapital mit den tatsächlichen Kaufnebenkosten rechnen.</label>` : ''}
       <p class="hint" style="margin:0">Verkaufsdatum und Verkaufspreis nur beim Status „Abgeschlossen“ ausfüllen. Planwerte, Rechnungen und Timeline ändert ihr weiter über den Claude-Chat.</p>
       <div class="form-err" id="edit-err"></div>
-      <button class="btn" type="submit">Speichern</button>
-      <button class="linkbtn" type="button" data-act="token-del">GitHub-Schlüssel auf diesem Gerät entfernen</button>
+      <button class="btn" type="submit">${ghToken() ? 'Speichern' : 'Änderungen für Claude kopieren'}</button>
+      ${ghToken() ? '<button class="linkbtn" type="button" data-act="token-del">GitHub-Schlüssel auf diesem Gerät entfernen</button>'
+                  : `<p class="hint" style="margin:0">Die Seite erzeugt einen kurzen Text mit euren Änderungen. Den im Claude-Chat einfügen, Claude trägt ihn ein.</p><button class="linkbtn" type="button" data-act="token-setup" data-p="${p.id}">Optional: direktes Speichern mit GitHub-Schlüssel einrichten</button>`}
     </form>`, true);
 }
 async function submitEdit(form){
@@ -1089,6 +1090,26 @@ async function submitEdit(form){
   ['zimmer','baujahr','ek','ekbasis','vkpreis'].forEach(id => { if(Number.isNaN(n(id))) fehler.push('Bitte bei '+id+' eine Zahl eintragen.'); });
   if(done && (!g('vkdatum') || !(n('vkpreis') > 0))) fehler.push('Für „Abgeschlossen“ bitte Verkaufsdatum und Verkaufspreis eintragen.');
   if(fehler.length){ err.textContent = fehler.join(' '); return; }
+  if(!ghToken()){
+    const alt = PROJEKTE.find(x => x.id === form.dataset.p), rg = alt.ekRegel;
+    const zeilen = [];
+    const cmp = (label, vorher, nachher) => { const a = vorher ?? '', b = nachher ?? ''; if(String(a) !== String(b)) zeilen.push(`${label}: ${a === '' ? 'leer' : a} → ${b === '' ? 'leer' : b}`); };
+    const zahl = v => v == null ? '' : nf(v);
+    cmp('Straße und Hausnummer', alt.adresse, g('adresse')); cmp('PLZ', alt.plz, g('plz')); cmp('Ort', alt.ort, g('ort'));
+    cmp('Stadtteil', alt.stadtteil, g('stadtteil')); cmp('Objektart', alt.objekt, g('objekt')); cmp('Lage im Haus', alt.lage, g('lage'));
+    cmp('Wohnfläche m²', zahl(alt.wohnflaeche), zahl(n('wohnflaeche'))); cmp('Zimmer', zahl(alt.zimmer), zahl(n('zimmer')));
+    cmp('Baujahr', alt.baujahr ?? '', n('baujahr') ?? ''); cmp('Energieklasse', alt.energie, g('energie')); cmp('Heizung', alt.heizung, g('heizung'));
+    cmp('Status', alt.phase, phase); cmp('Ankauf', alt.ankauf ? fd(alt.ankauf) : '', g('ankauf') ? fd(g('ankauf')) : '');
+    if(rg){ cmp('Eigenkapital ohne Kaufnebenkosten €', zahl(rg.basis), zahl(n('ekbasis')));
+      const cb = document.getElementById('e-knkist'); if(cb) cmp('Alle Kaufnebenkosten erfasst', rg.knkVollstaendig ? 'ja' : 'nein', cb.checked ? 'ja' : 'nein'); }
+    else cmp('Eigenkapital €', zahl(alt.eigenkapital), zahl(n('ek')));
+    cmp('Verkauf Datum', alt.verkauf ? fd(alt.verkauf.datum) : '', g('vkdatum') ? fd(g('vkdatum')) : '');
+    cmp('Verkaufspreis €', alt.verkauf ? zahl(alt.verkauf.preis) : '', zahl(n('vkpreis')));
+    if(!zeilen.length){ err.textContent = 'Es wurde nichts geändert.'; return; }
+    const txt = `Eckdaten in der Projektübersicht ändern, Projekt ${alt.id} (${alt.adresse}):\n` + zeilen.map(z => '- '+z).join('\n');
+    openModal('Text für Claude', `<p>Kopieren und im Claude-Chat einfügen. Claude trägt die Änderungen ein.</p><textarea class="copybox" id="copytext" readonly style="min-height:160px">${esc(txt)}</textarea><button class="btn ghost" type="button" data-act="copy">Text kopieren</button>`);
+    return;
+  }
   btn.disabled = true; btn.textContent = 'Speichere …'; err.textContent = '';
   try {
     const neu = await saveProject(form.dataset.p, o => {
@@ -1169,10 +1190,8 @@ document.addEventListener('click', e=>{
   else if(a==='lb-close'){ document.getElementById('lb').classList.remove('open'); }
   else if(a==='lb-prev'){ LB.i = (LB.i-1+LB.fotos.length)%LB.fotos.length; showLb(); }
   else if(a==='lb-next'){ LB.i = (LB.i+1)%LB.fotos.length; showLb(); }
-  else if(a==='edit'){
-    const p = PROJEKTE.find(x => x.id === t.dataset.p);
-    if(ghToken()) editDialog(p); else tokenDialog(p.id);
-  }
+  else if(a==='edit'){ editDialog(PROJEKTE.find(x => x.id === t.dataset.p)); }
+  else if(a==='token-setup'){ tokenDialog(t.dataset.p); }
   else if(a==='token-save'){
     const v = document.getElementById('gh-token').value.replace(/[^\x21-\x7E]/g, ''), err = document.getElementById('tok-err');
     if(!v){ err.textContent = 'Bitte den Schlüssel einfügen.'; return; }

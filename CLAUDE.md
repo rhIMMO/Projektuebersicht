@@ -16,7 +16,7 @@ Sprache: Deutsch. Keine Semikolons und keine Gedankenstriche als Satzzeichen. Ku
 | `werkzeuge/daten.py` | Ent- und Verschlüsseln, Fotos hinzufügen, Passwort ändern. |
 | `klartext/` | Entschlüsselte Arbeitskopie. Steht in `.gitignore` und wird NIE committet. |
 
-Die Seite kann Eckdaten eines Projekts selbst speichern. Sie verschlüsselt im Browser und schreibt `daten/pXX.enc` über die GitHub-API. Dafür hinterlegen die Nutzer einmal pro Gerät einen GitHub-Schlüssel (Fine-grained Token, nur dieses Repo, Contents: Read and write). Die Seite setzt dabei `geaendert` im Projekt.
+Über „Eckdaten bearbeiten“ erzeugt die Seite ohne GitHub-Schlüssel einen Text „Eckdaten in der Projektübersicht ändern, Projekt pXX …“ mit Zeilen „Feld: alt → neu“. Kommt dieser Text im Chat, die Änderungen genau so in `klartext/pXX.json` übernehmen (Zahlen im deutschen Format umrechnen, Datum als JJJJ-MM-TT, Status „Abgeschlossen“ setzt auch `status` und `verkauf`). Optional kann die Seite Eckdaten auch selbst speichern. Sie verschlüsselt im Browser und schreibt `daten/pXX.enc` über die GitHub-API. Dafür hinterlegen die Nutzer einmal pro Gerät einen GitHub-Schlüssel (Fine-grained Token, nur dieses Repo, Contents: Read and write). Die Seite setzt dabei `geaendert` im Projekt.
 
 ## Passwort
 
