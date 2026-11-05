@@ -350,7 +350,14 @@ a.addcard:hover{border-color:var(--accent)}
 .lb-nav.prev{left:12px}.lb-nav.next{right:12px}
 .modal{position:fixed;inset:0;z-index:70;background:rgba(10,12,15,.5);display:none;align-items:center;justify-content:center;padding:16px}
 .modal.open{display:flex}
-.modal-box{background:var(--surface);color:var(--ink);border-radius:16px;max-width:460px;width:100%;padding:22px;display:flex;flex-direction:column;gap:12px;box-shadow:0 24px 60px -20px rgba(0,0,0,.5)}
+.modal-box{background:var(--surface);color:var(--ink);border-radius:16px;max-width:460px;width:100%;max-height:calc(100% - 32px);overflow:auto;padding:22px;display:flex;flex-direction:column;gap:12px;box-shadow:0 24px 60px -20px rgba(0,0,0,.5)}
+.modal.wide .modal-box{max-width:680px}
+.phead-r{display:flex;flex-direction:column;align-items:flex-end;gap:10px}
+.btn.sm{padding:7px 12px;font-size:13px}
+.modal-box ol{margin:0;padding-left:20px;color:var(--ink-2);font-size:14px;display:flex;flex-direction:column;gap:4px}
+.form-err{color:var(--bad);font-size:13px;font-weight:600;min-height:18px}
+.linkbtn{background:none;border:0;padding:0;color:var(--accent);font-size:13px;font-weight:600;cursor:pointer;align-self:flex-start}
+@media (max-width:520px){.phead-r{flex-direction:row;align-items:center}}
 .modal-box p{margin:0;color:var(--ink-2);font-size:14px}
 .modal-box code{font-size:12.5px;background:var(--surface-2);padding:2px 6px;border-radius:6px;word-break:break-all}
 .modal-box .btn{align-self:flex-end}
@@ -458,7 +465,8 @@ function calc(p){
 }
 
 /* ============ Verschlüsselung (AES-GCM, Schlüssel per PBKDF2 aus dem Passwort) ============ */
-let META = null, KEY = null;
+let META = null, KEY = null, RAW = null;
+const REPO = 'rhIMMO/Projektuebersicht';
 const b64d = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
 const b64e = u => { let x=''; u.forEach(b => x += String.fromCharCode(b)); return btoa(x); };
 const ls = {get:k=>{try{return localStorage.getItem(k);}catch(e){return null;}}, set:(k,v)=>{try{localStorage.setItem(k,v);}catch(e){}}, del:k=>{try{localStorage.removeItem(k);}catch(e){}}};
@@ -489,11 +497,15 @@ function hydrateFotos(){
 }
 const esc = v => String(v ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 
+function setFoot(){
+  const st = [INDEX && INDEX.aktualisiert, ...PROJEKTE.map(p=>p.geaendert)].filter(Boolean).sort().pop();
+  document.getElementById('foot').textContent = st ? 'Stand der Daten: '+fd(st.slice(0,10))+', '+st.slice(11,16)+' Uhr' : '';
+}
 async function loadAll(){
   INDEX = await fetchJSON('daten/index.enc');
   PROJEKTE = await Promise.all(INDEX.projekte.map(id => fetchJSON('daten/'+id+'.enc')));
   document.getElementById('logout').hidden = false;
-  document.getElementById('foot').textContent = INDEX.aktualisiert ? 'Stand der Daten: '+fd(INDEX.aktualisiert.slice(0,10))+', '+INDEX.aktualisiert.slice(11,16)+' Uhr' : '';
+  setFoot();
   lastProject = parseRoute().p ? parseRoute().p.id : null;
   render();
 }
@@ -512,7 +524,7 @@ function showLock(msg){
 }
 async function unlock(pw, remember){
   const raw = await deriveRaw(pw);
-  KEY = await importRaw(raw);
+  KEY = await importRaw(raw); RAW = raw;
   try { await loadAll(); }
   catch(e){ KEY = null; throw e; }
   if(remember){ ls.set('rh-key', b64e(raw)); ls.set('rh-salt', META.salt); }
@@ -522,7 +534,7 @@ async function boot(){
   catch(e){ document.getElementById('app').innerHTML = '<p class="muted">Die Daten konnten nicht geladen werden. Seite neu laden.</p>'; return; }
   const saved = ls.get('rh-key');
   if(saved && ls.get('rh-salt') === META.salt){
-    try { KEY = await importRaw(b64d(saved)); await loadAll(); return; }
+    try { RAW = b64d(saved); KEY = await importRaw(RAW); await loadAll(); return; }
     catch(e){ ls.del('rh-key'); ls.del('rh-salt'); KEY = null; }
   }
   showLock();
@@ -649,7 +661,7 @@ function renderProjekt(p, tab){
       <h1>${esc(p.adresse)}</h1>
       <div class="facts">${facts.map(x=>`<span>${x}</span>`).join('')}</div>
     </div>
-    ${statusPill(p)}
+    <div class="phead-r">${statusPill(p)}<button class="btn ghost sm" data-act="edit" data-p="${p.id}">Eckdaten bearbeiten</button></div>
   </div>
   <nav class="tabs" role="tablist" aria-label="Projektbereiche">${TABS.map(([k,l,sh])=>`<a class="tab" role="tab" aria-selected="${k===tab}" href="#${p.id}--${k}"><span class="l">${l}</span><span class="s">${sh}</span></a>`).join('')}</nav>
   <section>${body}</section>`;
@@ -988,6 +1000,118 @@ document.addEventListener('input', e=>{ if(e.target.closest && e.target.closest(
 document.addEventListener('change', e=>{ if(e.target.closest && e.target.closest('#neu-form')) updateNeuSummary(); });
 document.addEventListener('submit', e=>{ if(e.target.id==='neu-form'){ e.preventDefault(); submitNeu(); } });
 
+
+/* ============ Eckdaten bearbeiten (speichert verschlüsselt direkt ins Repo) ============ */
+const PHASEN = ['Ankauf läuft','In Renovierung','In Vermarktung','Abgeschlossen'];
+const ghToken = () => ls.get('rh-gh-token');
+const nowLocal = () => { const d=new Date(), z=n=>String(n).padStart(2,'0'); return `${d.getFullYear()}-${z(d.getMonth()+1)}-${z(d.getDate())}T${z(d.getHours())}:${z(d.getMinutes())}`; };
+async function gh(path, opts){
+  opts = opts || {};
+  const r = await fetch('https://api.github.com/repos/'+REPO+(path?'/'+path:''), Object.assign({cache:'no-store'}, opts, {headers:{'Accept':'application/vnd.github+json','Authorization':'Bearer '+ghToken(),'X-GitHub-Api-Version':'2022-11-28'}}));
+  if(!r.ok){ const e = new Error('GitHub antwortet mit '+r.status); e.status = r.status; throw e; }
+  return r.status === 204 ? null : r.json();
+}
+async function encBytes(bytes){
+  const k = await crypto.subtle.importKey('raw', RAW, 'AES-GCM', false, ['encrypt']);
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const ct = new Uint8Array(await crypto.subtle.encrypt({name:'AES-GCM', iv}, k, bytes));
+  const out = new Uint8Array(12 + ct.length); out.set(iv, 0); out.set(ct, 12); return out;
+}
+async function saveProject(pid, mutate){
+  const path = 'contents/daten/'+pid+'.enc';
+  for(let versuch = 0; versuch < 2; versuch++){
+    const cur = await gh(path+'?ref=main');
+    const u = b64d(cur.content.replace(/\s/g,''));
+    const obj = JSON.parse(new TextDecoder().decode(await crypto.subtle.decrypt({name:'AES-GCM', iv:u.slice(0,12)}, KEY, u.slice(12))));
+    mutate(obj);
+    obj.geaendert = nowLocal();
+    const enc = await encBytes(new TextEncoder().encode(JSON.stringify(obj)));
+    try { await gh(path, {method:'PUT', body:JSON.stringify({message:'Eckdaten aktualisiert', content:b64e(enc), sha:cur.sha, branch:'main'})}); return obj; }
+    catch(e){ if(e.status === 409 && versuch === 0) continue; throw e; }
+  }
+}
+function tokenDialog(pid){
+  openModal('Speichern einrichten', `
+    <p>Damit die Seite Änderungen speichern darf, braucht sie einmal pro Gerät einen GitHub-Schlüssel. Er bleibt nur in diesem Browser.</p>
+    <ol>
+      <li>Als rhimmo auf <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">github.com/settings/personal-access-tokens/new</a> gehen.</li>
+      <li><b>Token name</b>: Projektuebersicht. <b>Expiration</b>: 1 Jahr.</li>
+      <li><b>Resource owner</b>: rhIMMO.</li>
+      <li><b>Repository access</b>: Only select repositories, dann Projektuebersicht.</li>
+      <li><b>Permissions</b>, Repository permissions: <b>Contents</b> auf <b>Read and write</b>.</li>
+      <li><b>Generate token</b> klicken und den Schlüssel kopieren (beginnt mit github_pat_).</li>
+    </ol>
+    <div class="fld"><label for="gh-token">GitHub-Schlüssel</label><div class="inp"><input id="gh-token" type="password" autocomplete="off" placeholder="github_pat_…"></div></div>
+    <div class="form-err" id="tok-err"></div>
+    <button class="btn" type="button" data-act="token-save" data-p="${pid}">Schlüssel speichern</button>`, true);
+}
+function editDialog(p){
+  const rg = p.ekRegel;
+  const f = (id, label, val, extra) => `<div class="fld"><label for="e-${id}">${label}</label><div class="inp"><input id="e-${id}" ${extra||'type="text"'} value="${esc(val ?? '')}" autocomplete="off">${''}</div></div>`;
+  const num = v => v == null ? '' : nf(v);
+  openModal('Eckdaten bearbeiten', `
+    <form id="edit-form" data-p="${p.id}" novalidate style="display:flex;flex-direction:column;gap:14px">
+      <div class="fields">
+        ${f('adresse','Straße und Hausnummer *',p.adresse)}
+        ${f('plz','PLZ',p.plz)}
+        ${f('ort','Ort *',p.ort)}
+        ${f('stadtteil','Stadtteil',p.stadtteil)}
+        ${f('objekt','Objektart',p.objekt)}
+        ${f('lage','Lage im Haus',p.lage)}
+        ${f('wohnflaeche','Wohnfläche in m² *',num(p.wohnflaeche),'type="text" inputmode="decimal"')}
+        ${f('zimmer','Zimmer',num(p.zimmer),'type="text" inputmode="decimal"')}
+        ${f('baujahr','Baujahr',p.baujahr ?? '','type="text" inputmode="numeric"')}
+        ${f('energie','Energieklasse',p.energie)}
+        ${f('heizung','Heizung',p.heizung)}
+        <div class="fld"><label for="e-phase">Status</label><div class="inp"><select id="e-phase">${PHASEN.map(x=>`<option ${x===p.phase?'selected':''}>${x}</option>`).join('')}</select></div></div>
+        ${f('ankauf','Ankauf (Beurkundung) *',p.ankauf,'type="date"')}
+        ${rg ? f('ekbasis','Eigenkapital ohne Kaufnebenkosten in €',num(rg.basis),'type="text" inputmode="decimal"') : f('ek','Eigenkapital in €',num(p.eigenkapital),'type="text" inputmode="decimal"')}
+        ${f('vkdatum','Verkauf (Beurkundung)',p.verkauf && p.verkauf.datum,'type="date"')}
+        ${f('vkpreis','Verkaufspreis in €',p.verkauf ? num(p.verkauf.preis) : '','type="text" inputmode="decimal"')}
+      </div>
+      ${rg ? `<label class="chk" style="display:flex;gap:8px;font-size:14px;color:var(--ink-2)"><input type="checkbox" id="e-knkist" ${rg.knkVollstaendig?'checked':''}> Alle Kaufnebenkosten sind als Rechnung erfasst. Eigenkapital mit den tatsächlichen Kaufnebenkosten rechnen.</label>` : ''}
+      <p class="hint" style="margin:0">Verkaufsdatum und Verkaufspreis nur beim Status „Abgeschlossen“ ausfüllen. Planwerte, Rechnungen und Timeline ändert ihr weiter über den Claude-Chat.</p>
+      <div class="form-err" id="edit-err"></div>
+      <button class="btn" type="submit">Speichern</button>
+      <button class="linkbtn" type="button" data-act="token-del">GitHub-Schlüssel auf diesem Gerät entfernen</button>
+    </form>`, true);
+}
+async function submitEdit(form){
+  const g = id => { const el = document.getElementById('e-'+id); return el ? el.value.trim() : ''; };
+  const n = id => { const v = g(id); return v === '' ? null : parseNum(v); };
+  const err = document.getElementById('edit-err'), btn = form.querySelector('button[type="submit"]');
+  const phase = g('phase'), done = phase === 'Abgeschlossen';
+  const fehler = [];
+  if(!g('adresse')) fehler.push('Straße und Hausnummer fehlt.');
+  if(!g('ort')) fehler.push('Ort fehlt.');
+  if(!(n('wohnflaeche') > 0)) fehler.push('Wohnfläche fehlt.');
+  if(!g('ankauf')) fehler.push('Ankaufsdatum fehlt.');
+  ['zimmer','baujahr','ek','ekbasis','vkpreis'].forEach(id => { if(Number.isNaN(n(id))) fehler.push('Bitte bei '+id+' eine Zahl eintragen.'); });
+  if(done && (!g('vkdatum') || !(n('vkpreis') > 0))) fehler.push('Für „Abgeschlossen“ bitte Verkaufsdatum und Verkaufspreis eintragen.');
+  if(fehler.length){ err.textContent = fehler.join(' '); return; }
+  btn.disabled = true; btn.textContent = 'Speichere …'; err.textContent = '';
+  try {
+    const neu = await saveProject(form.dataset.p, o => {
+      o.adresse = g('adresse'); o.plz = g('plz'); o.ort = g('ort'); o.stadtteil = g('stadtteil') || g('ort');
+      o.objekt = g('objekt'); o.lage = g('lage'); o.wohnflaeche = n('wohnflaeche'); o.zimmer = n('zimmer');
+      o.baujahr = n('baujahr'); o.energie = g('energie'); o.heizung = g('heizung'); o.ankauf = g('ankauf');
+      o.phase = phase; o.status = done ? 'abgeschlossen' : 'laufend';
+      o.verkauf = (g('vkdatum') && n('vkpreis') > 0) ? {datum:g('vkdatum'), preis:n('vkpreis')} : null;
+      if(o.ekRegel){ if(n('ekbasis') != null) o.ekRegel.basis = n('ekbasis'); const cb = document.getElementById('e-knkist'); if(cb) o.ekRegel.knkVollstaendig = cb.checked; }
+      else o.eigenkapital = n('ek');
+    });
+    const i = PROJEKTE.findIndex(x => x.id === neu.id); PROJEKTE[i] = neu;
+    setFoot(); render();
+    openModal('Gespeichert', '<p>Die Eckdaten sind gespeichert. Auf anderen Geräten erscheinen sie nach 1 bis 2 Minuten.</p>');
+  } catch(e){
+    btn.disabled = false; btn.textContent = 'Speichern';
+    err.textContent = e.status === 401 || e.status === 403 ? 'Der GitHub-Schlüssel ist ungültig oder hat keine Schreibrechte. Unten entfernen und neu einrichten.'
+      : e.status === 404 ? 'Der Schlüssel hat keinen Zugriff auf das Repo Projektuebersicht.'
+      : 'Speichern hat nicht geklappt: '+e.message;
+  }
+}
+document.addEventListener('submit', e => { if(e.target.id === 'edit-form'){ e.preventDefault(); submitEdit(e.target); } });
+
 /* ============ Routing und Interaktion ============ */
 function parseRoute(){
   const h = decodeURIComponent(location.hash.slice(1));
@@ -1016,7 +1140,8 @@ window.addEventListener('hashchange', ()=>{
   lastProject = pid;
   render();
 });
-function openModal(title, html){
+function openModal(title, html, wide){
+  document.getElementById('modal').classList.toggle('wide', !!wide);
   document.getElementById('m-t').textContent = title;
   document.getElementById('m-b').innerHTML = html;
   document.getElementById('modal').classList.add('open');
@@ -1044,7 +1169,22 @@ document.addEventListener('click', e=>{
   else if(a==='lb-close'){ document.getElementById('lb').classList.remove('open'); }
   else if(a==='lb-prev'){ LB.i = (LB.i-1+LB.fotos.length)%LB.fotos.length; showLb(); }
   else if(a==='lb-next'){ LB.i = (LB.i+1)%LB.fotos.length; showLb(); }
-  else if(a==='logout'){ ls.del('rh-key'); ls.del('rh-salt'); KEY = null; PROJEKTE = []; INDEX = null; FOTO_CACHE.clear(); location.hash = 'start'; showLock(); }
+  else if(a==='edit'){
+    const p = PROJEKTE.find(x => x.id === t.dataset.p);
+    if(ghToken()) editDialog(p); else tokenDialog(p.id);
+  }
+  else if(a==='token-save'){
+    const v = document.getElementById('gh-token').value.trim(), err = document.getElementById('tok-err');
+    if(!v){ err.textContent = 'Bitte den Schlüssel einfügen.'; return; }
+    ls.set('rh-gh-token', v); t.disabled = true; t.textContent = 'Prüfe …';
+    gh('').then(r => {
+      if(!r.permissions || !r.permissions.push) throw Object.assign(new Error('keine Schreibrechte'), {status:403});
+      editDialog(PROJEKTE.find(x => x.id === t.dataset.p));
+    }).catch(x => { ls.del('rh-gh-token'); t.disabled = false; t.textContent = 'Schlüssel speichern';
+      err.textContent = x.status === 401 ? 'Schlüssel ungültig.' : x.status === 404 ? 'Kein Zugriff auf das Repo Projektuebersicht.' : x.status === 403 ? 'Der Schlüssel hat keine Schreibrechte (Contents: Read and write).' : 'Prüfung fehlgeschlagen: '+x.message; });
+  }
+  else if(a==='token-del'){ ls.del('rh-gh-token'); openModal('Schlüssel entfernt', '<p>Der GitHub-Schlüssel ist auf diesem Gerät gelöscht.</p>'); }
+  else if(a==='logout'){ ls.del('rh-key'); ls.del('rh-salt'); KEY = null; RAW = null; PROJEKTE = []; INDEX = null; FOTO_CACHE.clear(); location.hash = 'start'; showLock(); }
   else if(a==='copy'){
     const ta = document.getElementById('copytext'); ta.select();
     const done = () => { t.textContent = 'Kopiert'; };

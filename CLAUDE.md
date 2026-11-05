@@ -16,6 +16,8 @@ Sprache: Deutsch. Keine Semikolons und keine Gedankenstriche als Satzzeichen. Ku
 | `werkzeuge/daten.py` | Ent- und Verschlüsseln, Fotos hinzufügen, Passwort ändern. |
 | `klartext/` | Entschlüsselte Arbeitskopie. Steht in `.gitignore` und wird NIE committet. |
 
+Die Seite kann Eckdaten eines Projekts selbst speichern. Sie verschlüsselt im Browser und schreibt `daten/pXX.enc` über die GitHub-API. Dafür hinterlegen die Nutzer einmal pro Gerät einen GitHub-Schlüssel (Fine-grained Token, nur dieses Repo, Contents: Read and write). Die Seite setzt dabei `geaendert` im Projekt.
+
 ## Passwort
 
 - Das Passwort steht nie im Repo, nie in einer Datei, nie in einer Commit-Nachricht.
@@ -24,6 +26,7 @@ Sprache: Deutsch. Keine Semikolons und keine Gedankenstriche als Satzzeichen. Ku
 
 ## Ablauf jeder Änderung
 
+0. `git pull origin main`. Die Seite speichert Eckdaten auch selbst (Knopf „Eckdaten bearbeiten“, Commit „Eckdaten aktualisiert“). Ohne Pull würden diese Änderungen überschrieben.
 1. `python3 werkzeuge/daten.py entschluesseln`
 2. JSON in `klartext/` bearbeiten.
 3. `python3 werkzeuge/daten.py verschluesseln` (verschlüsselt nur Geänderte, setzt `aktualisiert` im Index).
