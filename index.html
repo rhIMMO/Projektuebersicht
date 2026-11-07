@@ -596,6 +596,7 @@ function segbar(parts, minShare){
   return `<div class="segbar" role="img" aria-label="${label}">${parts.filter(x=>x.value>0).map(x=>{ const sh=x.value/tot; return `<div style="flex:${x.value} 1 0;background:${x.color};color:${x.ink}" data-tip="${x.name}|${e0(x.value)} · ${pc(sh)}">${sh>=minShare?pc(sh,0):''}</div>`; }).join('')}</div>`;
 }
 function coverFoto(p){
+  if(p.titelbild && p.titelbild.id && !(p.status==='abgeschlossen' && p.timeline.some(x=>x.typ==='abschluss' && x.fotos.length))) return {f:p.titelbild, key:p.id+'/'+p.titelbild.id+'_t'};
   const withF = p.timeline.filter(t=>t.fotos.length);
   if(!withF.length) return null;
   const t = p.status==='abgeschlossen' ? (p.timeline.find(x=>x.typ==='abschluss') || withF[withF.length-1]) : withF[withF.length-1];

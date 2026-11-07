@@ -82,6 +82,10 @@ Eintrag: `{"datum":"JJJJ-MM-TT","typ":"start|verlauf|abschluss","titel":"…","t
 - Alternativ `ekRegel: {"basis":16000,"knkTeile":{"notar":true,"makler":true,"grest":true},"knkVollstaendig":false}`: Eigenkapital = Basis plus die angehakten Teile der Kaufnebenkosten (notar = Notar und Grundbuch, makler = Makler, grest = Grunderwerbsteuer). Solange `knkVollstaendig` false ist, zählen die Planwerte, danach die Rechnungen. Sind Notar, Grundbuch, Makler und Grunderwerbsteuer erfasst, beim Nutzer nachfragen und dann `knkVollstaendig` auf true setzen. Die Nutzer können das auch selbst über „Eckdaten bearbeiten“ einstellen.
 - Planpositionen der Kaufnebenkosten bekommen `teil` (notar, makler, grest). Kostenpositionen der Kategorie `knk` bekommen `knkTeil` mit demselben Wert. Grundbuchkosten zählen zu `notar`.
 
+## Titelbild
+
+Foto mit `werkzeuge/daten.py foto pXX <bild>` einbinden und als `titelbild: {"id":"f…","cap":"Außenansicht"}` ins Projekt schreiben. Die Projektkarte zeigt dann dieses Bild. Ohne Titelbild nimmt sie das erste Foto des neuesten Timeline-Eintrags. Nach Abschluss zeigt sie das erste Abschlussfoto.
+
 ## Projektabschluss
 
 `verkauf: {"datum":"JJJJ-MM-TT","preis":0}`, `status: "abgeschlossen"`, `phase: "Abgeschlossen"`, Timeline-Eintrag `abschluss` mit Fotos.
