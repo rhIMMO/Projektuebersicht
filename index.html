@@ -570,7 +570,7 @@ const ICON = {
   doc:'<svg width="13" height="13" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4 1.5h5l3.5 3.5v9.5H4z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M9 1.5V5h3.5" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>',
   print:'<svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4 6V1.5h8V6M4 12H2.5V6.5h11V12H12M4 9.5h8v5H4z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>',
 };
-const state = {donut:'alle', filter:'alle', sort:'neu'};
+const state = {donut:'alle', filter:'alle', sort:'alt'};
 let LB = {fotos:[], i:0};
 
 function arcPath(cx,cy,R,r,a0,a1){
@@ -743,14 +743,15 @@ function invRow(p,k){
 
 function renderDoku(p){
   const items = p.timeline.map((t,i)=>({...t,i}));
-  const ordered = state.sort==='neu' ? [...items].reverse() : items;
+  const chrono = [...items].sort((a,b)=>a.datum.localeCompare(b.datum)||a.i-b.i);
+  const ordered = state.sort==='neu' ? chrono.reverse() : chrono;
   const lastIdx = items.length-1;
   const nF = items.reduce((s,t)=>s+t.fotos.length,0);
   if(!items.length) return `<div class="card empty"><h2>Noch keine Einträge</h2><p>Für den ersten Eintrag die Besichtigungsfotos und ein paar Stichworte im Claude-Chat schicken. Er wird automatisch zum Projektstart.</p></div>`;
   return `<div class="tl-tools"><span class="muted">${items.length} Einträge · ${nF} Fotos</span>
     <div class="seg" role="group" aria-label="Sortierung">
-      <button data-act="sort" data-v="neu" aria-pressed="${state.sort==='neu'}">Neueste zuerst</button>
       <button data-act="sort" data-v="alt" aria-pressed="${state.sort==='alt'}">Älteste zuerst</button>
+      <button data-act="sort" data-v="neu" aria-pressed="${state.sort==='neu'}">Neueste zuerst</button>
     </div></div>
   <ol class="tl">${ordered.map(t=>{
     const d = pd(t.datum);
