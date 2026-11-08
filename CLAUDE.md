@@ -50,7 +50,7 @@ Alle Beträge brutto. Eigenleistung nur als Text in der Timeline, nie als Kosten
 
 Gemeinsames OneDrive-Konto über den Microsoft-365-Connector. Wurzelordner `11_Projektdokumentation & Rechnungen`. IDs stehen in `klartext/index.json` unter `onedrive` und je Projekt unter `onedrive`.
 
-1. Dateien in `00_Eingang` lesen.
+1. Dateien in `00_Eingang` lesen. Rechnungen, die im Chat hochgeladen wurden, direkt lesen und nach „Belege aus dem Chat“ (unten) ins OneDrive bringen.
 2. Je Datei ermitteln: Rechnungsdatum, Lieferant, Bruttobetrag, Projekt (meist über die Objektadresse), Kategorie, bei Renovierung Material und Arbeit.
 3. Vorschlag als Tabelle zeigen, mit Zielordner und neuem Dateinamen. Erst nach Bestätigung handeln.
 4. Nachfragen statt raten, wenn: kein Rechnungsdatum, Projekt unklar, mehrere Projekte auf einer Rechnung, Betrag unleserlich, Gutschrift, Abschlag mit unklarer Verrechnung.
@@ -63,6 +63,19 @@ Gemeinsames OneDrive-Konto über den Microsoft-365-Connector. Wurzelordner `11_P
 6. Datei in `<Projektordner>/<JJJJ>/<MM_Monat>` verschieben. Der Monat richtet sich nach dem Rechnungsdatum. Fehlt der Jahresordner, ihn mit `01_Januar` bis `12_Dezember` anlegen und die IDs ins Projekt schreiben.
 7. Kostenposition anhängen: `{"id":"k001","datum":"JJJJ-MM-TT","lieferant":"…","text":"…","bucket":"…","betrag":0.00,"split":{…},"beleg":{"name":"…pdf","pfad":"…","url":"<webUrl>","itemId":"…"}}`. Ohne Beleg: `"beleg": false`.
 8. Verschlüsseln, committen, pushen. Kurz bestätigen: Anzahl, Summe, je Kategorie.
+
+### Belege aus dem Chat
+
+Der Connector kann keine PDFs ins OneDrive hochladen. Deshalb läuft der Upload über das private Repo `rhIMMO/Belege-Eingang` und das Make-Szenario „Belege aus dem Chat ins OneDrive“.
+
+1. Schritte 2 bis 5 wie oben: Daten ermitteln, Vorschlag zeigen, Bestätigung abwarten, Dateinamen mit dem Werkzeug bilden.
+2. Repo `rhIMMO/Belege-Eingang` mit Schreibzugriff anhängen und klonen.
+3. Jede Datei unter ihrem neuen Namen nach `eingang/` kopieren. Ein Commit für alle, Nachricht ohne Namen und Beträge, zum Beispiel „Belege: 2 Dateien“. Auf `main` pushen.
+4. Make legt die Dateien nach etwa 30 bis 60 Sekunden unter demselben Namen in `00_Eingang` ab. Mit `read_resource` auf die Eingang-ID prüfen, bis zu 3 Minuten warten.
+5. Weiter mit Schritt 6 bis 8 oben: verschieben, Kostenposition mit `url` und `itemId` anhängen, verschlüsseln, pushen.
+6. Danach die Dateien in `Belege-Eingang` mit `git rm` aus `eingang/` löschen und pushen. Make ignoriert diesen Push.
+
+Kommt nach 3 Minuten nichts an: Die Nutzer sollen in Make unter History den letzten Lauf ansehen. Nach einem Fehler schaltet Make das Szenario ab, dann wieder auf ON stellen. Dateien immer direkt in `eingang/` legen, nie in Unterordner. Sonst scheitert der Dateiname in OneDrive. Der GitHub-Schlüssel im Make-Modul „Datei von GitHub laden“ läuft etwa im November 2027 ab. Anleitung: https://claude.ai/artifact/Upo95ggdiUHCEAEUjf5jzg
 
 ## Timeline
 
