@@ -706,7 +706,7 @@ function renderStart(){
 function bauZeile(p){
   const bp = bauplanVon(p); if(!bp) return '';
   const b = bauCalc(bp);
-  return `<div><div class="mrow"><span>Baufortschritt${bp.beispiel?' (Beispiel)':''}</span><span class="num">${pc(b.ist,0)}</span></div><div class="meter"><span style="width:${b.ist*100}%"></span></div><div class="bz-line" style="margin-top:6px"><span>${b.aktuell.length?esc(b.aktuell[0].name)+(b.aktuell.length>1?' und weitere':''):b.fertig?'Bau fertig':'Pause'}</span>${bzState(b)}</div></div>`;
+  return `<div><div class="mrow"><span>Baufortschritt${bp.beispiel?' (Beispiel)':''}</span><span class="num">${pc(b.ist,0)}</span></div><div class="meter"><span style="width:${b.ist*100}%"></span></div><div class="bz-line" style="margin-top:6px"><span>${b.aktuell.length?esc(b.aktuell[0].name)+(b.aktuell.length>1?' und weitere':''):esc(b.ruhe)}</span>${bzState(b)}</div></div>`;
 }
 function card({p,c}){
   const done = p.status==='abgeschlossen';
@@ -910,13 +910,16 @@ function bauCalc(bp){
   const ms = (bp.meilensteine||[]).map(m=>({...m, late: !m.erreicht && t>m.datum})).sort((a,b)=>a.datum.localeCompare(b.datum));
   const nextMs = ms.find(m=>!m.erreicht) || null;
   const verzug = dDiff(planEnde, prognose);
-  return {t, gw, ist, soll, start, planEnde, prognose, verzug, fertig, aktuell, naechstes, ms, nextMs};
+  const vorStart = t < start && gw.every(g=>g.status==='offen');
+  const ruhe = aktuell.length ? aktuell.map(g=>g.name).join(', ') : fertig ? 'Bau fertig' : vorStart ? 'Baustart '+fdk(start) : naechstes ? 'Pause bis '+fdk(naechstes.start) : 'Pause';
+  return {vorStart, ruhe, t, gw, ist, soll, start, planEnde, prognose, verzug, fertig, aktuell, naechstes, ms, nextMs};
 }
 const bzState = b => b.fertig ? `<span class="bz-state ok">Bau fertig</span>` : b.verzug>0 ? `<span class="bz-state late">${tage(b.verzug)} Verzug</span>` : b.ist>0 ? `<span class="bz-state ok">Im Plan</span>` : `<span class="bz-state wait">Noch nicht begonnen</span>`;
 function relTage(t, d){ const n = dDiff(t,d); return n===0 ? 'heute' : n>0 ? `in ${tage(n)}` : `vor ${tage(-n)}`; }
 
 function axisTicks(a, b){
-  const out = [], d = pd(a); d.setDate(1); d.setMonth(d.getMonth()+1);
+  const out = [], d = pd(a);
+  if(pd(a).getDate() <= 20) out.push(a); d.setDate(1); d.setMonth(d.getMonth()+1);
   while(isoD(d) <= b){ out.push(isoD(d)); d.setMonth(d.getMonth()+1); }
   return out;
 }
@@ -947,7 +950,7 @@ function renderBau(p){
 
   const tile = (l,v,d) => `<div class="tile"><div class="l">${l}</div><div class="v">${v}</div><div class="d">${d}</div></div>`;
   const diff = Math.round((b.ist-b.soll)*100);
-  const akt = b.aktuell.length ? b.aktuell.map(g=>g.name).join(', ') : b.fertig ? 'Bau abgeschlossen' : b.naechstes ? 'Pause bis '+fdk(b.naechstes.start) : '–';
+  const akt = b.ruhe;
   const tiles = `<div class="tiles">
     ${tile('Baufortschritt', `<span class="num">${pc(b.ist,0)}</span>`, `Soll heute ${pc(b.soll,0)} · ${diff===0?'genau im Soll':dl(diff,true,v=>v+' Pkt.')}`)}
     ${tile('Gerade dran', `<span style="font-size:17px;line-height:1.3;display:block">${esc(akt)}</span>`, b.naechstes ? `Danach ${esc(b.naechstes.name)} ab ${fdk(b.naechstes.start)}` : 'Keine offenen Gewerke')}
@@ -993,7 +996,7 @@ function renderBauPortfolio(lauf){
   <div class="card pf">
     <div class="pf-row" style="padding-top:0;padding-bottom:6px"><span class="muted" style="font-size:12px">Projekt und aktuelles Gewerk</span><div class="g-axis" style="font-size:12px;color:var(--muted)">${ticks.map(m=>`<span style="left:${X(m)}%">${MON[pd(m).getMonth()]}</span>`).join('')}</div><span class="muted" style="font-size:12px;text-align:right">Fortschritt</span></div>
     ${rows.map(({p,b,bp})=>`<a class="pf-row" href="#${p.id}--bau">
-      <div><div class="addr2">${esc(p.adresse)}</div><div class="sb">${b.aktuell.length?esc(b.aktuell.map(g=>g.name).join(', ')):b.fertig?'Bau fertig':'Pause'}${bp.beispiel?' · Beispiel':''}</div></div>
+      <div><div class="addr2">${esc(p.adresse)}</div><div class="sb">${esc(b.ruhe)}${bp.beispiel?' · Beispiel':''}</div></div>
       <div class="pf-track">${grid}${today}${b.gw.map(g=>`<span class="pf-seg ${g.status}${g.late?' late':''}" style="left:${X(g.start)}%;width:${W(g.start,g.ende)}%" data-tip="${esc(g.name)}|${fdk(g.start)} bis ${fdk(g.ende)} · ${g.f} %"></span>`).join('')}${b.nextMs?`<span class="g-ms ${b.nextMs.late?'late':''}" style="left:${X(b.nextMs.datum)}%;top:3px;width:11px;height:11px;margin-left:-5.5px" data-tip="Nächster Meilenstein: ${esc(b.nextMs.name)}|${fd(b.nextMs.datum)} · ${b.nextMs.late?'überfällig':relTage(t,b.nextMs.datum)}"></span>`:''}</div>
       <div class="pf-r"><b>${pc(b.ist,0)}</b>${bzState(b)}<span class="sb">Bauende ${fd(b.prognose)}</span></div>
     </a>`).join('')}
