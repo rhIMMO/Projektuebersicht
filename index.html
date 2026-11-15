@@ -429,6 +429,25 @@ a.addcard:hover{border-color:var(--accent)}
 .modal.open{display:flex}
 .modal-box{background:var(--surface);color:var(--ink);border-radius:16px;max-width:460px;width:100%;max-height:calc(100% - 32px);overflow:auto;padding:22px;display:flex;flex-direction:column;gap:12px;box-shadow:0 24px 60px -20px rgba(0,0,0,.5)}
 .modal.wide .modal-box{max-width:680px}
+.modal.xwide .modal-box{max-width:880px}
+.pe{display:flex;flex-direction:column;gap:14px}
+.pe-h{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:6px}
+.pe-h h4{margin:0;font-size:15px}
+.pe-list{display:flex;flex-direction:column;gap:10px}
+.pe-row{border:1px solid var(--line);border-radius:12px;padding:12px;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;background:var(--surface)}
+.pe-row .w2{grid-column:span 2}.pe-row .w4{grid-column:1 / -1}
+.pe-row .fld label{font-size:12px}
+.pe-row .inp input,.pe-row .inp select{padding:8px 10px;font-size:14px}
+.pe-row.done{background:var(--good-soft)}
+.pe-act{grid-column:1 / -1;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.pe-act .nr{font-size:12px;font-weight:700;color:var(--muted)}
+.pe-act div{display:flex;gap:6px}
+.icobtn{border:1px solid var(--line);background:var(--surface);border-radius:8px;min-width:36px;height:32px;padding:0 10px;cursor:pointer;font-size:13px;font-weight:600;color:var(--ink-2)}
+.icobtn:hover{color:var(--ink);border-color:var(--ink-2)}
+.icobtn.del:hover{color:var(--bad);border-color:var(--bad)}
+.pe-foot{position:sticky;bottom:-22px;background:var(--surface);padding:12px 0 4px;border-top:1px solid var(--line);display:flex;flex-direction:column;gap:8px}
+@media (max-width:560px){.pe-row{grid-template-columns:1fr 1fr}.pe-row .w2{grid-column:1 / -1}}
+.bz-headr{display:flex;align-items:center;gap:12px;flex-wrap:wrap;justify-content:flex-end}
 .phead-r{display:flex;flex-direction:column;align-items:flex-end;gap:10px}
 .btn.sm{padding:7px 12px;font-size:13px}
 .modal-box ol{margin:0;padding-left:20px;color:var(--ink-2);font-size:14px;display:flex;flex-direction:column;gap:4px}
@@ -602,6 +621,7 @@ async function loadAll(){
   setFoot();
   lastProject = parseRoute().p ? parseRoute().p.id : null;
   render();
+  setTimeout(refreshFromGitHub, 0);
 }
 function showLock(msg){
   document.getElementById('logout').hidden = true;
@@ -941,7 +961,7 @@ function axisTicks(a, b){
 }
 function renderBau(p){
   const bp = bauplanVon(p);
-  if(!bp) return `<div class="card empty"><h2>Kein Bauzeitenplan hinterlegt</h2><p>Den Bauzeitenplan des Handwerkers als PDF, Excel oder Foto im Claude-Chat schicken. Claude überträgt Gewerke, Termine und Meilensteine projektscharf.</p></div>`;
+  if(!bp) return `<div class="card empty"><h2>Kein Bauzeitenplan hinterlegt</h2><p>Den Bauzeitenplan des Handwerkers als PDF, Excel oder Foto im Claude-Chat schicken. Claude überträgt Gewerke, Termine und Meilensteine projektscharf.</p><button class="btn ghost sm" data-act="plan-edit" data-p="${p.id}">Plan selbst anlegen</button></div>`;
   const b = bauCalc(bp);
   const lo = addD([b.start, ...b.ms.map(m=>m.datum)].sort()[0], -3);
   const hi = addD([b.prognose, ...b.ms.map(m=>m.datum), ...b.gw.map(g=>g.istEnde||g.ende)].sort().pop(), 4);
@@ -983,15 +1003,15 @@ function renderBau(p){
     <ol class="steps">
       <li><b>Plan hochladen.</b> Den Bauzeitenplan des Handwerkers als PDF, Excel oder Foto im Claude-Chat schicken. Claude übernimmt Gewerke, Firmen, Termine und Meilensteine genau für dieses Projekt.</li>
       <li><b>Abhaken.</b> Ist ein Gewerk oder ein Meilenstein erledigt, rechts das Kästchen antippen. Die Seite speichert sofort mit dem heutigen Datum. Nochmal antippen nimmt es zurück. Dafür braucht jedes Gerät einmal den GitHub-Schlüssel.</li>
-      <li><b>Mehr Details.</b> Prozente, abweichende Daten oder Verschiebungen im Claude-Chat schreiben, zum Beispiel „Sanitär 60 %, Fliesen starten erst am 12.01.“.</li>
-      <li><b>Plan geändert.</b> Neue Version schicken. Claude passt die Termine an, schon erledigte Gewerke bleiben erledigt.</li>
+      <li><b>Plan bearbeiten.</b> Über den Knopf oben Termine verschieben, Fortschritt in Prozent eintragen, Gewerke und Meilensteine ändern, hinzufügen oder löschen. Speichern schreibt direkt auf die Seite.</li>
+      <li><b>Neue Planversion vom Handwerker.</b> Einfach im Claude-Chat schicken. Claude passt die Termine an, erledigte Gewerke bleiben erledigt.</li>
     </ol>
     <p class="hint">Ohne Meldung gilt ein Gewerk in seinem Zeitfenster als planmäßig laufend. Ist das Plan-Ende vorbei und es ist nicht abgehakt, wird es rot. Verzug zählt in Kalendertagen. Die Prognose verschiebt das Bauende um den größten offenen Verzug.</p></div>`;
 
-  return `${bp.beispiel?`<div class="banner"><b>Vorschlag mit Beispieldaten.</b> Für dieses Projekt ist noch kein Bauzeitenplan hinterlegt. Sobald der Plan des Handwerkers im Chat kommt, ersetzt Claude die Beispielwerte.</div>`:''}
+  return `${bp.beispiel?`<div class="banner"><b>Vorschlag mit Beispieldaten.</b> Für dieses Projekt ist noch kein Bauzeitenplan hinterlegt. Den Plan des Handwerkers im Claude-Chat schicken oder hier selbst anlegen. <button class="linkbtn" style="font-size:14px" data-act="plan-edit" data-p="${p.id}">Eigenen Plan anlegen</button></div>`:''}
   ${tiles}
   <div class="card" style="margin-bottom:16px">
-    <div class="card-head"><h2>Bauzeitenplan</h2><span class="muted">${bp.beispiel?'Beispiel':esc(bp.quelle||'')}${bp.stand?' · Stand '+fd(bp.stand):''}</span></div>
+    <div class="card-head"><h2>Bauzeitenplan</h2><div class="bz-headr"><span class="muted">${bp.beispiel?'Beispiel':esc(bp.quelle||'')}${bp.stand?' · Stand '+fd(bp.stand):''}</span>${bp.beispiel?'':`<button class="btn ghost sm" data-act="plan-edit" data-p="${p.id}">Plan bearbeiten</button>`}</div></div>
     <div class="gantt${edit?' edit':''}" role="group" aria-label="Bauzeitenplan mit ${b.gw.length} Gewerken, Fortschritt ${pc(b.ist,0)}">${head}${rows}${msRow}</div>
     <div class="g-legend"><span><i style="background:var(--good)"></i>Fertig</span><span><i style="background:var(--accent)"></i>Läuft, Füllung = Fortschritt laut Plan oder Meldung</span><span><i style="background:var(--surface-2);box-shadow:inset 0 0 0 1px var(--line)"></i>Geplant</span><span><i style="background:var(--bad)"></i>Verzug</span><span><i class="d"></i>Meilenstein</span><span><i style="width:2px;background:var(--ink)"></i>Heute</span></div>
   </div>
@@ -1292,12 +1312,30 @@ async function encBytes(bytes){
   const ct = new Uint8Array(await crypto.subtle.encrypt({name:'AES-GCM', iv}, k, bytes));
   const out = new Uint8Array(12 + ct.length); out.set(iv, 0); out.set(ct, 12); return out;
 }
+async function ghLoad(pid){
+  const cur = await gh('contents/daten/'+pid+'.enc?ref=main');
+  const u = b64d(cur.content.replace(/\s/g,''));
+  const obj = JSON.parse(new TextDecoder().decode(await crypto.subtle.decrypt({name:'AES-GCM', iv:u.slice(0,12)}, KEY, u.slice(12))));
+  return {cur, obj};
+}
+/* Mit GitHub-Schlüssel: nach dem Laden den neuesten Stand direkt aus dem Repo holen.
+   GitHub Pages zeigt Änderungen sonst erst nach 1 bis 2 Minuten. */
+async function refreshFromGitHub(){
+  if(!ghToken() || !KEY) return;
+  let geaendert = false;
+  for(const p of [...PROJEKTE]){
+    try {
+      const {obj} = await ghLoad(p.id);
+      const k = PROJEKTE.findIndex(x => x.id === p.id);
+      if(k >= 0 && JSON.stringify(obj) !== JSON.stringify(PROJEKTE[k])){ PROJEKTE[k] = obj; geaendert = true; }
+    } catch(e){ return; }
+  }
+  if(geaendert && !BZ_PENDING && parseRoute().view !== 'neu'){ setFoot(); render(); }
+}
 async function saveProject(pid, mutate, msg){
   const path = 'contents/daten/'+pid+'.enc';
   for(let versuch = 0; versuch < 2; versuch++){
-    const cur = await gh(path+'?ref=main');
-    const u = b64d(cur.content.replace(/\s/g,''));
-    const obj = JSON.parse(new TextDecoder().decode(await crypto.subtle.decrypt({name:'AES-GCM', iv:u.slice(0,12)}, KEY, u.slice(12))));
+    const {cur, obj} = await ghLoad(pid);
     mutate(obj);
     obj.geaendert = nowLocal();
     const enc = await encBytes(new TextEncoder().encode(JSON.stringify(obj)));
@@ -1464,6 +1502,121 @@ function bzToggle(inp){
   });
 }
 document.addEventListener('change', e => { if(e.target.matches && e.target.matches('input[data-bz]')) bzToggle(e.target); });
+
+let PE = null;
+const peFld = (cls, label, val, type, extra) => `<div class="fld ${extra||''}"><label>${label}</label><div class="inp"><input class="${cls}" type="${type||'text'}" value="${esc(val ?? '')}" autocomplete="off"${type==='number'?' inputmode="numeric" min="0" max="100" step="5"':''}></div></div>`;
+function peGewerk(g, o){
+  g = g || {}; const fertig = !!g.istEnde;
+  return `<div class="pe-row pe-g ${fertig?'done':''}" data-o="${o ?? ''}">
+    ${peFld('peg-name','Gewerk *',g.name,'text','w2')}${peFld('peg-firma','Firma',g.firma,'text','w2')}
+    ${peFld('peg-start','Start *',g.start,'date')}${peFld('peg-ende','Ende *',g.ende,'date')}
+    ${peFld('peg-f','Fortschritt %',fertig?100:(g.fortschritt||''),'number')}${peFld('peg-ist','Erledigt am',g.istEnde,'date')}
+    ${peFld('peg-notiz','Notiz',g.notiz,'text','w4')}
+    <div class="pe-act"><span class="nr"></span><div><button type="button" class="icobtn" data-act="pe-up" aria-label="Nach oben">↑</button><button type="button" class="icobtn" data-act="pe-down" aria-label="Nach unten">↓</button><button type="button" class="icobtn del" data-act="pe-del">Löschen</button></div></div>
+  </div>`;
+}
+function peMeilenstein(m, o){
+  m = m || {typ:'bau'};
+  return `<div class="pe-row pe-m ${m.erreicht?'done':''}" data-o="${o ?? ''}">
+    ${peFld('pem-name','Meilenstein *',m.name,'text','w2')}${peFld('pem-datum','Datum *',m.datum,'date')}
+    <div class="fld"><label>Art</label><div class="inp"><select class="pem-typ"><option value="bau" ${m.typ!=='vertrieb'?'selected':''}>Bau</option><option value="vertrieb" ${m.typ==='vertrieb'?'selected':''}>Vermarktung</option></select></div></div>
+    ${peFld('pem-erreicht','Erreicht am',m.erreicht,'date')}
+    <div class="pe-act" style="grid-column:2 / -1;align-self:end"><span class="nr"></span><div><button type="button" class="icobtn" data-act="pe-up" aria-label="Nach oben">↑</button><button type="button" class="icobtn" data-act="pe-down" aria-label="Nach unten">↓</button><button type="button" class="icobtn del" data-act="pe-del">Löschen</button></div></div>
+  </div>`;
+}
+function peNummern(){ document.querySelectorAll('#pe-g .pe-g').forEach((r,i) => r.querySelector('.nr').textContent = String(i+1).padStart(2,'0')); }
+async function openPlanEdit(pid){
+  if(!ghToken()){
+    openModal('Plan bearbeiten', `<p>Damit die Seite den Bauzeitenplan speichern kann, braucht dieses Gerät einmal den GitHub-Schlüssel. Es ist derselbe wie bei „Eckdaten bearbeiten“.</p>
+      <button class="btn" type="button" data-act="token-setup" data-p="${pid}" data-next="plan">Jetzt einrichten</button>
+      <p>Alternativ Änderungen im Claude-Chat schreiben.</p>`);
+    return;
+  }
+  openModal('Plan bearbeiten', '<p>Lade den aktuellen Stand …</p>', true);
+  let basis;
+  try { basis = (await ghLoad(pid)).obj; }
+  catch(e){ openModal('Plan bearbeiten', `<p>Der aktuelle Stand konnte nicht geladen werden. ${e.status === 401 || e.status === 403 ? 'Der GitHub-Schlüssel ist ungültig oder abgelaufen. Unter „Eckdaten bearbeiten“ entfernen und neu einrichten.' : esc(e.message)}</p>`); return; }
+  const k = PROJEKTE.findIndex(x => x.id === pid); if(k >= 0){ PROJEKTE[k] = basis; render(); }
+  PE = {pid, basis, geaendert: basis.geaendert || ''};
+  const bp = basis.bauplan || {gewerke:[], meilensteine:[]};
+  openModal('Bauzeitenplan bearbeiten', `<form id="pe-form" class="pe" novalidate>
+    <div class="fields" style="grid-template-columns:1fr">${peFld('pe-quelle','Quelle oder Version des Plans',bp.quelle || '','text')}</div>
+    <div class="pe-h"><h4>Gewerke</h4><button type="button" class="btn ghost sm" data-act="pe-add-g">+ Gewerk</button></div>
+    <div class="pe-list" id="pe-g">${(bp.gewerke||[]).map((g,i) => peGewerk(g,i)).join('') || peGewerk(null)}</div>
+    <div class="pe-h"><h4>Meilensteine</h4><button type="button" class="btn ghost sm" data-act="pe-add-m">+ Meilenstein</button></div>
+    <div class="pe-list" id="pe-m">${(bp.meilensteine||[]).map((m,i) => peMeilenstein(m,i)).join('')}</div>
+    <div class="pe-foot">
+      <p class="hint" style="margin:0">„Erledigt am“ ausfüllen setzt den Fortschritt auf 100 %. Leeres Datum nimmt es zurück. Fortschritt leer lassen heißt: läuft laut Plan.</p>
+      <div class="form-err" id="pe-err"></div>
+      <button class="btn" type="submit">Speichern</button>
+    </div>
+  </form>`, true);
+  document.getElementById('modal').classList.add('xwide');
+  peNummern();
+}
+function peLesen(){
+  const v = (r, c) => { const el = r.querySelector('.'+c); return el ? el.value.trim() : ''; };
+  const fehler = [], heute = HEUTE();
+  const altG = (PE.basis.bauplan && PE.basis.bauplan.gewerke) || [], altM = (PE.basis.bauplan && PE.basis.bauplan.meilensteine) || [];
+  const gewerke = [...document.querySelectorAll('#pe-g .pe-g')].map((r, i) => {
+    const nr = i+1, o = r.dataset.o === '' ? {} : (altG[+r.dataset.o] || {});
+    const name = v(r,'peg-name'), start = v(r,'peg-start'), ende = v(r,'peg-ende'), ist = v(r,'peg-ist'), fRaw = v(r,'peg-f');
+    if(!name) fehler.push(`Gewerk ${nr}: Name fehlt.`);
+    if(!start || !ende) fehler.push(`Gewerk ${nr}: Start und Ende eintragen.`);
+    else if(ende < start) fehler.push(`Gewerk ${nr}: Ende liegt vor dem Start.`);
+    let f = fRaw === '' ? 0 : Math.round(Number(fRaw.replace(',', '.')));
+    if(Number.isNaN(f) || f < 0 || f > 100){ fehler.push(`Gewerk ${nr}: Fortschritt zwischen 0 und 100 eintragen.`); f = 0; }
+    const x = {...o, name, firma: v(r,'peg-firma') || undefined, start, ende, notiz: v(r,'peg-notiz') || undefined};
+    if(ist){ if(!o.istEnde) x.fortschrittVorher = o.fortschritt || 0; x.istEnde = ist; x.fortschritt = 100; }
+    else if(f >= 100){ x.istEnde = heute; x.fortschritt = 100; }
+    else { x.istEnde = null; x.fortschritt = f; delete x.fortschrittVorher; }
+    if(!x.firma) delete x.firma; if(!x.notiz) delete x.notiz;
+    return x;
+  });
+  const meilensteine = [...document.querySelectorAll('#pe-m .pe-m')].map((r, i) => {
+    const nr = i+1, o = r.dataset.o === '' ? {} : (altM[+r.dataset.o] || {});
+    const name = v(r,'pem-name'), datum = v(r,'pem-datum');
+    if(!name) fehler.push(`Meilenstein ${nr}: Name fehlt.`);
+    if(!datum) fehler.push(`Meilenstein ${nr}: Datum fehlt.`);
+    return {...o, name, datum, typ: r.querySelector('.pem-typ').value, erreicht: v(r,'pem-erreicht') || null};
+  });
+  return {fehler, gewerke, meilensteine, quelle: (document.querySelector('.pe-quelle').value || '').trim()};
+}
+async function submitPlan(form){
+  const err = document.getElementById('pe-err'), btn = form.querySelector('button[type="submit"]');
+  const d = peLesen();
+  if(d.fehler.length){ err.textContent = d.fehler.slice(0,4).join(' ') + (d.fehler.length > 4 ? ` Und ${d.fehler.length-4} weitere.` : ''); return; }
+  if(!d.gewerke.length && !confirm('Ohne Gewerke wird der Bauzeitenplan entfernt. Fortfahren?')) return;
+  const basisGeaendert = PE.geaendert, pid = PE.pid;
+  const neuBp = d.gewerke.length ? {...(PE.basis.bauplan || {}), quelle: d.quelle || 'Eigener Plan', stand: HEUTE(), gewerke: d.gewerke, meilensteine: d.meilensteine} : null;
+  btn.disabled = true; btn.textContent = 'Speichere …'; err.textContent = '';
+  try {
+    await BZ_QUEUE;
+    const neu = await saveProject(pid, o => {
+      if((o.geaendert || '') !== basisGeaendert) throw Object.assign(new Error('konflikt'), {konflikt: true});
+      if(neuBp) o.bauplan = neuBp; else delete o.bauplan;
+    }, 'Bauzeitenplan bearbeitet');
+    const k = PROJEKTE.findIndex(x => x.id === neu.id); PROJEKTE[k] = neu;
+    document.getElementById('modal').classList.remove('xwide');
+    setFoot(); render();
+    openModal('Gespeichert', '<p>Der Bauzeitenplan ist gespeichert. Auf anderen Geräten erscheint er sofort, wenn dort ein GitHub-Schlüssel hinterlegt ist, sonst nach 1 bis 2 Minuten.</p>');
+  } catch(e){
+    btn.disabled = false; btn.textContent = 'Speichern';
+    err.textContent = e.konflikt ? 'In der Zwischenzeit hat jemand anderes den Plan geändert. Bitte schließen und „Plan bearbeiten“ neu öffnen. Eure Eingaben vorher kurz notieren.'
+      : e.status === 401 || e.status === 403 ? 'Der GitHub-Schlüssel ist ungültig oder abgelaufen. Unter „Eckdaten bearbeiten“ entfernen und neu einrichten.'
+      : 'Speichern hat nicht geklappt: '+e.message;
+  }
+}
+document.addEventListener('submit', e => { if(e.target.id === 'pe-form'){ e.preventDefault(); submitPlan(e.target); } });
+/* Fortschritt und Erledigt-Datum gegenseitig nachführen */
+document.addEventListener('input', e => {
+  const r = e.target.closest && e.target.closest('.pe-g'); if(!r) return;
+  const f = r.querySelector('.peg-f'), ist = r.querySelector('.peg-ist');
+  if(e.target === ist){ if(ist.value) f.value = 100; else if(f.value === '100') f.value = ''; }
+  if(e.target === f){ if(Number(f.value) >= 100 && !ist.value) ist.value = HEUTE(); if(Number(f.value) < 100 && ist.value) ist.value = ''; }
+  r.classList.toggle('done', !!ist.value);
+});
+document.addEventListener('input', e => { const r = e.target.closest && e.target.closest('.pe-m'); if(r) r.classList.toggle('done', !!r.querySelector('.pem-erreicht').value); });
 window.addEventListener('beforeunload', e => { if(BZ_PENDING){ e.preventDefault(); e.returnValue = ''; } });
 
 /* ============ Routing und Interaktion ============ */
@@ -1496,6 +1649,7 @@ window.addEventListener('hashchange', ()=>{
 });
 function openModal(title, html, wide){
   document.getElementById('modal').classList.toggle('wide', !!wide);
+  document.getElementById('modal').classList.remove('xwide');
   document.getElementById('m-t').textContent = title;
   document.getElementById('m-b').innerHTML = html;
   document.getElementById('modal').classList.add('open');
@@ -1524,6 +1678,12 @@ document.addEventListener('click', e=>{
   else if(a==='lb-prev'){ LB.i = (LB.i-1+LB.fotos.length)%LB.fotos.length; showLb(); }
   else if(a==='lb-next'){ LB.i = (LB.i+1)%LB.fotos.length; showLb(); }
   else if(a==='edit'){ editDialog(PROJEKTE.find(x => x.id === t.dataset.p)); }
+  else if(a==='plan-edit'){ openPlanEdit(t.dataset.p); }
+  else if(a==='pe-add-g'){ document.getElementById('pe-g').insertAdjacentHTML('beforeend', peGewerk(null)); peNummern(); const r = document.querySelector('#pe-g .pe-g:last-child'); r.scrollIntoView({block:'nearest'}); r.querySelector('.peg-name').focus(); }
+  else if(a==='pe-add-m'){ document.getElementById('pe-m').insertAdjacentHTML('beforeend', peMeilenstein(null)); const r = document.querySelector('#pe-m .pe-m:last-child'); r.scrollIntoView({block:'nearest'}); r.querySelector('.pem-name').focus(); }
+  else if(a==='pe-del'){ const r = t.closest('.pe-row'); const n = (r.querySelector('.peg-name, .pem-name') || {}).value; if(!n || confirm(`„${n}“ löschen?`)){ r.remove(); peNummern(); } }
+  else if(a==='pe-up'){ const r = t.closest('.pe-row'); if(r.previousElementSibling) r.parentNode.insertBefore(r, r.previousElementSibling); peNummern(); }
+  else if(a==='pe-down'){ const r = t.closest('.pe-row'); if(r.nextElementSibling) r.parentNode.insertBefore(r.nextElementSibling, r); peNummern(); }
   else if(a==='token-setup'){ tokenDialog(t.dataset.p, t.dataset.next); }
   else if(a==='token-save'){
     const v = document.getElementById('gh-token').value.replace(/[^\x21-\x7E]/g, ''), err = document.getElementById('tok-err');
@@ -1534,6 +1694,7 @@ document.addEventListener('click', e=>{
     gh('').then(r => {
       if(!r.permissions || !r.permissions.push) throw Object.assign(new Error('keine Schreibrechte'), {status:403});
       if(t.dataset.next === 'bau'){ openModal('Eingerichtet', '<p>Der Schlüssel ist gespeichert. Ab jetzt reicht ein Tipp aufs Kästchen.</p>'); render(); }
+      else if(t.dataset.next === 'plan'){ openPlanEdit(t.dataset.p); }
       else editDialog(PROJEKTE.find(x => x.id === t.dataset.p));
     }).catch(x => { ls.del('rh-gh-token'); t.disabled = false; t.textContent = 'Schlüssel speichern';
       err.textContent = x.status === 401 ? `GitHub lehnt den Schlüssel ab (${esc(x.gh || 'Bad credentials')}). Eingefügt: ${v.length} Zeichen. Meist war der Schlüssel unvollständig kopiert. Bitte auf GitHub neu erzeugen und mit dem Kopier-Symbol neben dem Schlüssel kopieren.` : x.status === 404 ? 'Kein Zugriff auf das Repo Projektuebersicht.' : x.status === 403 ? 'Der Schlüssel hat keine Schreibrechte (Contents: Read and write).' : 'Prüfung fehlgeschlagen: '+x.message; });
