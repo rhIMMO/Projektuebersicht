@@ -308,6 +308,15 @@ table.gw{width:100%;border-collapse:collapse;font-size:14px}
 .bz-state.wait{background:var(--surface-2);color:var(--ink-2)}
 .gantt{--lab:230px;position:relative}
 .g-head,.g-row{display:grid;grid-template-columns:var(--lab) 1fr;gap:0 16px;align-items:center}
+.gantt.edit .g-head,.gantt.edit .g-row{grid-template-columns:var(--lab) 1fr 64px}
+.g-chk-h{font-size:12px;color:var(--muted);text-align:center}
+.chkbox{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-width:44px;min-height:36px;cursor:pointer;border-radius:8px;font-size:12px;color:var(--muted)}
+.chkbox:hover{background:var(--surface-2)}
+.chkbox input{width:20px;height:20px;margin:0;accent-color:var(--good);cursor:pointer}
+.chkbox input:disabled{cursor:wait;opacity:.6}
+.g-done{justify-self:center}
+.toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);z-index:75;background:var(--ink);color:var(--surface);border-radius:99px;padding:9px 16px;font-size:13.5px;font-weight:600;box-shadow:0 10px 30px -12px rgba(0,0,0,.5);max-width:calc(100% - 32px)}
+.toast[hidden]{display:none}
 .g-head{font-size:12px;color:var(--muted);border-bottom:1px solid var(--line);padding-bottom:6px;margin-bottom:4px}
 .g-axis{position:relative;height:18px}
 .g-axis span{position:absolute;top:0;padding-left:5px;border-left:1px solid var(--line);white-space:nowrap;line-height:18px}
@@ -335,9 +344,11 @@ table.gw{width:100%;border-collapse:collapse;font-size:14px}
 .g-legend span{display:inline-flex;align-items:center;gap:6px}
 .g-legend i{display:inline-block;width:16px;height:9px;border-radius:3px}
 .g-legend i.d{width:10px;height:10px;transform:rotate(45deg);border-radius:2px;border:2px solid var(--ink-2)}
-@media (max-width:640px){.g-head,.g-row{grid-template-columns:1fr}.g-head>div:first-child{display:none}.g-lab{display:flex;justify-content:space-between;gap:10px;margin-bottom:4px}.g-lab span{text-align:right}.g-track .g-grid,.g-track .g-today{top:-2px;bottom:-2px}}
+@media (max-width:640px){.g-head,.g-row,.gantt.edit .g-head,.gantt.edit .g-row{grid-template-columns:1fr}.gantt.edit .g-row{grid-template-columns:1fr auto;gap:0 8px}.gantt.edit .g-row .g-track{grid-column:1 / 3;grid-row:2}.gantt.edit .g-row .g-done{grid-column:2;grid-row:1}.gantt.edit .g-lab{display:block;margin-bottom:2px}.gantt.edit .g-lab span{text-align:left}.g-chk-h{display:none}.g-head>div:first-child{display:none}.g-lab{display:flex;justify-content:space-between;gap:10px;margin-bottom:4px}.g-lab span{text-align:right}.g-track .g-grid,.g-track .g-today{top:-2px;bottom:-2px}}
 .ms-list{list-style:none;margin:0;padding:0}
 .ms-list li{display:grid;grid-template-columns:18px 1fr auto;gap:2px 12px;align-items:start;padding:11px 0;border-bottom:1px solid var(--line)}
+.ms-list.edit li{grid-template-columns:44px 1fr auto;align-items:center;gap:2px 8px}
+.ms-list.edit .chkbox{min-height:40px}
 .ms-list li:last-child{border-bottom:0}
 .ms-list .dia{width:11px;height:11px;margin:5px 0 0 3px;transform:rotate(45deg);border-radius:2px;border:2px solid var(--ink-2)}
 .ms-list .dia.done{background:var(--good);border-color:var(--good)}
@@ -466,6 +477,7 @@ a.addcard:hover{border-color:var(--accent)}
   <div class="modal-box"><h3 id="m-t"></h3><div id="m-b" style="display:flex;flex-direction:column;gap:10px"></div><button class="btn" data-act="m-close">Schließen</button></div>
 </div>
 <div class="tip" id="tip" hidden></div>
+<div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
 
 <script>
 /* ============ Daten (später je Projekt eine JSON-Datei) ============ */
@@ -886,15 +898,19 @@ function bauplanVon(p){
 function bauCalc(bp){
   const t = HEUTE();
   const gw = bp.gewerke.map((g,i)=>{
-    const f = g.istEnde ? 100 : Math.max(0, Math.min(100, g.fortschritt||0));
     const dur = dDiff(g.start,g.ende)+1;
-    const status = f>=100 ? 'fertig' : (f>0 || g.istStart) ? 'laeuft' : 'offen';
-    let verzug = 0, grund = '';
-    if(status==='fertig'){ verzug = Math.max(0, dDiff(g.ende, g.istEnde||g.ende)); if(verzug) grund = `${tage(verzug)} später fertig`; }
-    else if(t>g.ende){ verzug = dDiff(g.ende,t); grund = `${tage(verzug)} über Plan`; }
-    else if(status==='offen' && t>g.start){ verzug = dDiff(g.start,t); grund = `Start ${tage(verzug)} überfällig`; }
     const soll = Math.max(0, Math.min(1, (dDiff(g.start,t)+1)/dur));
-    return {...g, i, f, dur, status, verzug, grund, soll, late: verzug>0 && status!=='fertig'};
+    const gemeldet = Math.max(0, Math.min(100, g.fortschritt||0));
+    const fertig = !!g.istEnde || gemeldet>=100;
+    /* Ohne gemeldeten Fortschritt gilt ein Gewerk im Planfenster als laufend nach Plan.
+       Nach Plan-Ende ohne Häkchen: höchstens 90 % angenommen und Verzug. */
+    const annahme = !fertig && !gemeldet && t>=g.start;
+    const f = fertig ? 100 : gemeldet ? gemeldet : annahme ? Math.min(90, Math.round(soll*100)) : 0;
+    const status = fertig ? 'fertig' : (gemeldet>0 || g.istStart || t>=g.start) ? 'laeuft' : 'offen';
+    let verzug = 0, grund = '';
+    if(fertig){ verzug = Math.max(0, dDiff(g.ende, g.istEnde||g.ende)); if(verzug) grund = `${tage(verzug)} später fertig`; }
+    else if(t>g.ende){ verzug = dDiff(g.ende,t); grund = `${tage(verzug)} über Plan, nicht abgehakt`; }
+    return {...g, i, f, dur, status, verzug, grund, soll, annahme, late: verzug>0 && !fertig};
   });
   const sumD = gw.reduce((s,g)=>s+g.dur,0) || 1;
   const ist = gw.reduce((s,g)=>s+g.f/100*g.dur,0)/sumD;
@@ -907,7 +923,7 @@ function bauCalc(bp){
   const prognose = istEnde || addD(planEnde, offeneVerzug);
   const aktuell = gw.filter(g=>g.status==='laeuft');
   const naechstes = gw.filter(g=>g.status==='offen').sort((a,b)=>a.start.localeCompare(b.start))[0] || null;
-  const ms = (bp.meilensteine||[]).map(m=>({...m, late: !m.erreicht && t>m.datum})).sort((a,b)=>a.datum.localeCompare(b.datum));
+  const ms = (bp.meilensteine||[]).map((m,i)=>({...m, i, late: !m.erreicht && t>m.datum})).sort((a,b)=>a.datum.localeCompare(b.datum));
   const nextMs = ms.find(m=>!m.erreicht) || null;
   const verzug = dDiff(planEnde, prognose);
   const vorStart = t < start && gw.every(g=>g.status==='offen');
@@ -936,17 +952,19 @@ function renderBau(p){
   const showToday = b.t>=lo && b.t<=hi;
   const grid = ticks.map(m=>`<span class="g-grid" style="left:${X(m)}%"></span>`).join('');
   const today = showToday ? `<span class="g-today" style="left:${X(b.t)}%"></span>` : '';
-  const sub = g => g.status==='fertig' ? `Fertig ${fdk(g.istEnde||g.ende)}${g.verzug?` · <span class="late">${g.grund}</span>`:''}` : g.late ? `<span class="late">${g.grund}</span> · ${g.f} %` : g.status==='laeuft' ? `Läuft · ${g.f} %` : `${fdk(g.start)} bis ${fdk(g.ende)}`;
+  const sub = g => g.status==='fertig' ? `Erledigt ${fdk(g.istEnde||g.ende)}${g.verzug?` · <span class="late">${g.grund}</span>`:''}` : g.late ? `<span class="late">${g.grund}</span>` : g.status==='laeuft' ? (g.annahme ? `Läuft laut Plan bis ${fdk(g.ende)}` : `Läuft · ${g.f} %`) : `${fdk(g.start)} bis ${fdk(g.ende)}`;
+  const edit = !bp.beispiel;
+  const chk = (kind, i, on, name) => `<label class="chkbox g-done" title="${on?'Erledigt, zum Zurücknehmen antippen':'Als erledigt abhaken'}"><input type="checkbox" data-bz="${kind}" data-p="${p.id}" data-i="${i}" ${on?'checked':''} aria-label="${esc(name)} erledigt"></label>`;
   const rows = b.gw.map(g=>{
     const cls = g.status + (g.late?' late':'');
-    const tipTxt = `${esc(g.name)}|Plan ${fd(g.start)} bis ${fd(g.ende)} · ${g.f} %${g.firma?' · '+esc(g.firma):''}${g.grund?' · '+g.grund:''}`;
+    const tipTxt = `${esc(g.name)}|Plan ${fd(g.start)} bis ${fd(g.ende)} · ${g.f} %${g.annahme?' laut Plan':''}${g.firma?' · '+esc(g.firma):''}${g.notiz?' · '+esc(g.notiz):''}${g.grund?' · '+g.grund:''}`;
     const over = g.late ? `<span class="g-ist" style="left:${X(addD(g.ende,1))}%;width:${W(addD(g.ende,1), b.t)}%"></span>` : (g.status==='fertig' && g.verzug) ? `<span class="g-ist" style="left:${X(addD(g.ende,1))}%;width:${W(addD(g.ende,1), g.istEnde)}%"></span>` : '';
     return `<div class="g-row"><div class="g-lab"><b>${esc(g.name)}</b><span>${g.firma?esc(g.firma)+' · ':''}${sub(g)}</span></div>
-      <div class="g-track">${grid}${today}<span class="g-bar ${cls}" style="left:${X(g.start)}%;width:${W(g.start,g.ende)}%" data-tip="${tipTxt}"><i style="width:${g.f}%"></i></span>${over}</div></div>`;
+      <div class="g-track">${grid}${today}<span class="g-bar ${cls}" style="left:${X(g.start)}%;width:${W(g.start,g.ende)}%" data-tip="${tipTxt}"><i style="width:${g.f}%"></i></span>${over}</div>${edit?chk('g', g.i, g.status==='fertig', g.name):''}</div>`;
   }).join('');
   const msRow = b.ms.length ? `<div class="g-row"><div class="g-lab"><b>Meilensteine</b><span>${b.ms.filter(m=>m.erreicht).length} von ${b.ms.length} erreicht</span></div>
-      <div class="g-track">${grid}${today}${b.ms.map(m=>`<span class="g-ms ${m.erreicht?'done':m.late?'late':''}" style="left:${X(m.datum)}%" data-tip="${esc(m.name)}|${fd(m.datum)} · ${m.erreicht?'erreicht':m.late?'überfällig':relTage(b.t,m.datum)}"></span>`).join('')}</div></div>` : '';
-  const head = `<div class="g-head"><div></div><div class="g-axis">${ticks.map(m=>`<span style="left:${X(m)}%">${MON[pd(m).getMonth()]}${pd(m).getMonth()===0?' '+pd(m).getFullYear():''}</span>`).join('')}${showToday?`<span class="g-today-l" style="left:${X(b.t)}%;border:0;padding:0 6px">Heute</span>`:''}</div></div>`;
+      <div class="g-track">${grid}${today}${b.ms.map(m=>`<span class="g-ms ${m.erreicht?'done':m.late?'late':''}" style="left:${X(m.datum)}%" data-tip="${esc(m.name)}|${fd(m.datum)} · ${m.erreicht?'erreicht':m.late?'überfällig':relTage(b.t,m.datum)}"></span>`).join('')}</div>${edit?'<span></span>':''}</div>` : '';
+  const head = `<div class="g-head"><div></div><div class="g-axis">${ticks.map(m=>`<span style="left:${X(m)}%">${MON[pd(m).getMonth()]}${pd(m).getMonth()===0?' '+pd(m).getFullYear():''}</span>`).join('')}${showToday?`<span class="g-today-l" style="left:${X(b.t)}%;border:0;padding:0 6px">Heute</span>`:''}</div>${edit?'<div class="g-chk-h">Erledigt</div>':''}</div>`;
 
   const tile = (l,v,d) => `<div class="tile"><div class="l">${l}</div><div class="v">${v}</div><div class="d">${d}</div></div>`;
   const diff = Math.round((b.ist-b.soll)*100);
@@ -959,22 +977,23 @@ function renderBau(p){
   </div>`;
 
   const msList = b.ms.length ? `<div class="card"><div class="card-head"><h2>Meilensteine</h2><span class="muted">${b.ms.filter(m=>m.erreicht).length} von ${b.ms.length}</span></div>
-    <ul class="ms-list">${b.ms.map(m=>`<li><span class="dia ${m.erreicht?'done':m.late?'late':''}"></span><div><div class="nm">${esc(m.name)}</div><div class="sb">${m.typ==='vertrieb'?'Vermarktung':'Bau'}</div></div>
+    <ul class="ms-list${edit?' edit':''}">${b.ms.map(m=>`<li>${edit?chk('m', m.i, !!m.erreicht, m.name):`<span class="dia ${m.erreicht?'done':m.late?'late':''}"></span>`}<div><div class="nm">${esc(m.name)}</div><div class="sb">${m.typ==='vertrieb'?'Vermarktung':'Bau'}</div></div>
       <div class="dt">${fd(m.datum)}<small class="${m.erreicht?'ok':m.late?'late':''}">${m.erreicht ? (m.erreicht>m.datum?`erreicht ${fdk(m.erreicht)}, ${tage(dDiff(m.datum,m.erreicht))} später`:`erreicht ${fdk(m.erreicht)}`) : m.late ? 'überfällig' : relTage(b.t,m.datum)}</small></div></li>`).join('')}</ul></div>` : '';
   const howto = `<div class="card"><h2 style="margin-bottom:12px">So bleibt der Plan aktuell</h2>
     <ol class="steps">
       <li><b>Plan hochladen.</b> Den Bauzeitenplan des Handwerkers als PDF, Excel oder Foto im Claude-Chat schicken. Claude übernimmt Gewerke, Firmen, Termine und Meilensteine genau für dieses Projekt.</li>
-      <li><b>Stand melden.</b> Kurz schreiben, zum Beispiel „Elektro fertig, Sanitär 60 %, Fliesen starten erst am 12.01.“. Claude trägt Fortschritt und Ist-Termine ein.</li>
+      <li><b>Abhaken.</b> Ist ein Gewerk oder ein Meilenstein erledigt, rechts das Kästchen antippen. Die Seite speichert sofort mit dem heutigen Datum. Nochmal antippen nimmt es zurück. Dafür braucht jedes Gerät einmal den GitHub-Schlüssel.</li>
+      <li><b>Mehr Details.</b> Prozente, abweichende Daten oder Verschiebungen im Claude-Chat schreiben, zum Beispiel „Sanitär 60 %, Fliesen starten erst am 12.01.“.</li>
       <li><b>Plan geändert.</b> Neue Version schicken. Claude passt die Termine an, schon erledigte Gewerke bleiben erledigt.</li>
     </ol>
-    <p class="hint">Verzug zählt in Kalendertagen gegenüber dem Plan. Die Prognose verschiebt das Bauende um den größten offenen Verzug.</p></div>`;
+    <p class="hint">Ohne Meldung gilt ein Gewerk in seinem Zeitfenster als planmäßig laufend. Ist das Plan-Ende vorbei und es ist nicht abgehakt, wird es rot. Verzug zählt in Kalendertagen. Die Prognose verschiebt das Bauende um den größten offenen Verzug.</p></div>`;
 
   return `${bp.beispiel?`<div class="banner"><b>Vorschlag mit Beispieldaten.</b> Für dieses Projekt ist noch kein Bauzeitenplan hinterlegt. Sobald der Plan des Handwerkers im Chat kommt, ersetzt Claude die Beispielwerte.</div>`:''}
   ${tiles}
   <div class="card" style="margin-bottom:16px">
     <div class="card-head"><h2>Bauzeitenplan</h2><span class="muted">${bp.beispiel?'Beispiel':esc(bp.quelle||'')}${bp.stand?' · Stand '+fd(bp.stand):''}</span></div>
-    <div class="gantt" role="img" aria-label="Bauzeitenplan mit ${b.gw.length} Gewerken, Fortschritt ${pc(b.ist,0)}">${head}${rows}${msRow}</div>
-    <div class="g-legend"><span><i style="background:var(--good)"></i>Fertig</span><span><i style="background:var(--accent)"></i>Läuft, Füllung = Fortschritt</span><span><i style="background:var(--surface-2);box-shadow:inset 0 0 0 1px var(--line)"></i>Geplant</span><span><i style="background:var(--bad)"></i>Verzug</span><span><i class="d"></i>Meilenstein</span><span><i style="width:2px;background:var(--ink)"></i>Heute</span></div>
+    <div class="gantt${edit?' edit':''}" role="group" aria-label="Bauzeitenplan mit ${b.gw.length} Gewerken, Fortschritt ${pc(b.ist,0)}">${head}${rows}${msRow}</div>
+    <div class="g-legend"><span><i style="background:var(--good)"></i>Fertig</span><span><i style="background:var(--accent)"></i>Läuft, Füllung = Fortschritt laut Plan oder Meldung</span><span><i style="background:var(--surface-2);box-shadow:inset 0 0 0 1px var(--line)"></i>Geplant</span><span><i style="background:var(--bad)"></i>Verzug</span><span><i class="d"></i>Meilenstein</span><span><i style="width:2px;background:var(--ink)"></i>Heute</span></div>
   </div>
   <div class="grid2">${msList}${howto}</div>`;
 }
@@ -1273,7 +1292,7 @@ async function encBytes(bytes){
   const ct = new Uint8Array(await crypto.subtle.encrypt({name:'AES-GCM', iv}, k, bytes));
   const out = new Uint8Array(12 + ct.length); out.set(iv, 0); out.set(ct, 12); return out;
 }
-async function saveProject(pid, mutate){
+async function saveProject(pid, mutate, msg){
   const path = 'contents/daten/'+pid+'.enc';
   for(let versuch = 0; versuch < 2; versuch++){
     const cur = await gh(path+'?ref=main');
@@ -1282,11 +1301,11 @@ async function saveProject(pid, mutate){
     mutate(obj);
     obj.geaendert = nowLocal();
     const enc = await encBytes(new TextEncoder().encode(JSON.stringify(obj)));
-    try { await gh(path, {method:'PUT', body:JSON.stringify({message:'Eckdaten aktualisiert', content:b64e(enc), sha:cur.sha, branch:'main'})}); return obj; }
+    try { await gh(path, {method:'PUT', body:JSON.stringify({message:msg||'Eckdaten aktualisiert', content:b64e(enc), sha:cur.sha, branch:'main'})}); return obj; }
     catch(e){ if(e.status === 409 && versuch === 0) continue; throw e; }
   }
 }
-function tokenDialog(pid){
+function tokenDialog(pid, next){
   openModal('Speichern einrichten', `
     <p>Damit die Seite Änderungen speichern darf, braucht sie einmal pro Gerät einen GitHub-Schlüssel. Er bleibt nur in diesem Browser.</p>
     <ol>
@@ -1299,7 +1318,7 @@ function tokenDialog(pid){
     </ol>
     <div class="fld"><label for="gh-token">GitHub-Schlüssel</label><div class="inp"><input id="gh-token" type="password" autocomplete="off" placeholder="github_pat_…"></div></div>
     <div class="form-err" id="tok-err"></div>
-    <button class="btn" type="button" data-act="token-save" data-p="${pid}">Schlüssel speichern</button>`, true);
+    <button class="btn" type="button" data-act="token-save" data-p="${pid}" data-next="${next||''}">Schlüssel speichern</button>`, true);
 }
 function editDialog(p){
   const rg = p.ekRegel, ec = calc(p);
@@ -1394,6 +1413,59 @@ async function submitEdit(form){
 }
 document.addEventListener('submit', e => { if(e.target.id === 'edit-form'){ e.preventDefault(); submitEdit(e.target); } });
 
+/* ============ Bauzeitenplan abhaken (speichert verschlüsselt direkt ins Repo) ============ */
+let BZ_PENDING = 0, BZ_QUEUE = Promise.resolve(), toastT = null;
+function toast(msg, ms){
+  const el = document.getElementById('toast'); el.textContent = msg; el.hidden = false;
+  clearTimeout(toastT); if(ms) toastT = setTimeout(() => { el.hidden = true; }, ms);
+}
+/* Setzt den Zielzustand, nicht ein Umschalten. So bleibt es bei Wiederholung und Konflikten richtig. */
+function bzMutation(kind, i, name, an, datum){
+  return o => {
+    const bp = o.bauplan; if(!bp) throw new Error('Kein Bauzeitenplan im Projekt.');
+    const liste = kind === 'g' ? bp.gewerke : bp.meilensteine;
+    const x = liste && liste[i];
+    if(!x || x.name !== name) throw new Error('Der Plan wurde inzwischen geändert. Bitte die Seite neu laden.');
+    if(kind === 'g'){
+      if(an){ if(!x.istEnde){ x.fortschrittVorher = x.fortschritt || 0; x.istEnde = datum; x.fortschritt = 100; } }
+      else { x.istEnde = null; x.fortschritt = x.fortschrittVorher || 0; delete x.fortschrittVorher; }
+    } else {
+      x.erreicht = an ? (x.erreicht || datum) : null;
+    }
+    bp.stand = datum;
+  };
+}
+function bzToggle(inp){
+  const pid = inp.dataset.p, kind = inp.dataset.bz, i = +inp.dataset.i, an = inp.checked;
+  const p = PROJEKTE.find(x => x.id === pid); if(!p || !p.bauplan) return;
+  const x = (kind === 'g' ? p.bauplan.gewerke : p.bauplan.meilensteine)[i];
+  const datum = HEUTE();
+  if(!ghToken()){
+    inp.checked = !an;
+    const txt = `Bauzeitenplan ${p.id} (${p.adresse}): ${x.name} ${an ? 'erledigt am '+fd(datum) : 'doch nicht erledigt'}`;
+    openModal('Abhaken einrichten', `<p>Damit die Seite Häkchen speichern kann, braucht dieses Gerät einmal den GitHub-Schlüssel. Danach reicht ein Tipp aufs Kästchen.</p>
+      <button class="btn" type="button" data-act="token-setup" data-p="${p.id}" data-next="bau">Jetzt einrichten</button>
+      <p>Oder diesen Text kopieren und im Claude-Chat einfügen:</p>
+      <textarea class="copybox" id="copytext" readonly style="min-height:70px">${esc(txt)}</textarea><button class="btn ghost" type="button" data-act="copy">Text kopieren</button>`);
+    return;
+  }
+  const mut = bzMutation(kind, i, x.name, an, datum);
+  try { mut(p); } catch(e){ inp.checked = !an; openModal('Nicht gespeichert', `<p>${esc(e.message)}</p>`); return; }
+  BZ_PENDING++; render(); toast('Speichere …');
+  BZ_QUEUE = BZ_QUEUE.then(() => saveProject(pid, mut, 'Baufortschritt aktualisiert')).then(neu => {
+    BZ_PENDING--;
+    if(!BZ_PENDING){ const k = PROJEKTE.findIndex(y => y.id === neu.id); PROJEKTE[k] = neu; setFoot(); render(); toast('Gespeichert', 2200); }
+  }).catch(async e => {
+    BZ_PENDING--;
+    document.getElementById('toast').hidden = true;
+    try { const frisch = await fetchJSON('daten/'+pid+'.enc'); const k = PROJEKTE.findIndex(y => y.id === pid); PROJEKTE[k] = frisch; } catch(x){}
+    render();
+    openModal('Nicht gespeichert', `<p>${e.status === 401 || e.status === 403 ? 'Der GitHub-Schlüssel ist ungültig oder abgelaufen. Unter „Eckdaten bearbeiten“ entfernen und neu einrichten.' : e.status === 404 ? 'Der Schlüssel hat keinen Zugriff auf das Repo Projektuebersicht.' : 'Speichern hat nicht geklappt: '+esc(e.message)}</p>`);
+  });
+}
+document.addEventListener('change', e => { if(e.target.matches && e.target.matches('input[data-bz]')) bzToggle(e.target); });
+window.addEventListener('beforeunload', e => { if(BZ_PENDING){ e.preventDefault(); e.returnValue = ''; } });
+
 /* ============ Routing und Interaktion ============ */
 function parseRoute(){
   const h = decodeURIComponent(location.hash.slice(1));
@@ -1452,7 +1524,7 @@ document.addEventListener('click', e=>{
   else if(a==='lb-prev'){ LB.i = (LB.i-1+LB.fotos.length)%LB.fotos.length; showLb(); }
   else if(a==='lb-next'){ LB.i = (LB.i+1)%LB.fotos.length; showLb(); }
   else if(a==='edit'){ editDialog(PROJEKTE.find(x => x.id === t.dataset.p)); }
-  else if(a==='token-setup'){ tokenDialog(t.dataset.p); }
+  else if(a==='token-setup'){ tokenDialog(t.dataset.p, t.dataset.next); }
   else if(a==='token-save'){
     const v = document.getElementById('gh-token').value.replace(/[^\x21-\x7E]/g, ''), err = document.getElementById('tok-err');
     if(!v){ err.textContent = 'Bitte den Schlüssel einfügen.'; return; }
@@ -1461,7 +1533,8 @@ document.addEventListener('click', e=>{
     ls.set('rh-gh-token', v); t.disabled = true; t.textContent = 'Prüfe …';
     gh('').then(r => {
       if(!r.permissions || !r.permissions.push) throw Object.assign(new Error('keine Schreibrechte'), {status:403});
-      editDialog(PROJEKTE.find(x => x.id === t.dataset.p));
+      if(t.dataset.next === 'bau'){ openModal('Eingerichtet', '<p>Der Schlüssel ist gespeichert. Ab jetzt reicht ein Tipp aufs Kästchen.</p>'); render(); }
+      else editDialog(PROJEKTE.find(x => x.id === t.dataset.p));
     }).catch(x => { ls.del('rh-gh-token'); t.disabled = false; t.textContent = 'Schlüssel speichern';
       err.textContent = x.status === 401 ? `GitHub lehnt den Schlüssel ab (${esc(x.gh || 'Bad credentials')}). Eingefügt: ${v.length} Zeichen. Meist war der Schlüssel unvollständig kopiert. Bitte auf GitHub neu erzeugen und mit dem Kopier-Symbol neben dem Schlüssel kopieren.` : x.status === 404 ? 'Kein Zugriff auf das Repo Projektuebersicht.' : x.status === 403 ? 'Der Schlüssel hat keine Schreibrechte (Contents: Read and write).' : 'Prüfung fehlgeschlagen: '+x.message; });
   }

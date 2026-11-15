@@ -116,7 +116,8 @@ Tab „Bauzeitenplan“ je Projekt und „Bauzeiten im Überblick“ auf der Sta
 - Meilensteine aus dem Plan übernehmen. Fehlen sie, Bauabnahme (Ende des letzten Gewerks) vorschlagen und beim Nutzer nachfragen, dazu Fotos und Homestaging sowie Vermarktungsstart mit `typ: "vertrieb"`.
 - Statusmeldungen („Elektro fertig, Sanitär 60 %“): `fortschritt` setzen, bei fertig `istEnde` = gemeldetes Datum oder heute. `stand` auf heute setzen. Geplante Termine `start` und `ende` nur ändern, wenn ein neuer Plan kommt. Ein erreichter Meilenstein bekommt `erreicht` mit Datum.
 - Neue Planversion: Termine ersetzen, `fortschritt` und `istEnde` erledigter Gewerke behalten, `quelle` und `stand` anpassen.
-- Rechenlogik: Fortschritt gewichtet nach geplanter Dauer in Kalendertagen. Verzug = größter Rückstand eines offenen Gewerks (Ende überschritten oder Start überfällig). Prognose Bauende = letztes Plan-Ende plus dieser Verzug.
+- Die Seite kann selbst speichern (GitHub-Schlüssel wie bei „Eckdaten bearbeiten“, Commit „Baufortschritt aktualisiert“): Kästchen „Erledigt“ je Gewerk und Meilenstein. Abhaken setzt `istEnde` (Gewerk) oder `erreicht` (Meilenstein) auf heute und `stand` auf heute. Beim Gewerk merkt sich die Seite den alten Wert in `fortschrittVorher`, Zurücknehmen stellt ihn wieder her. Vor jeder Änderung deshalb immer `git pull`.
+- Rechenlogik: Fortschritt gewichtet nach geplanter Dauer in Kalendertagen. Ohne gemeldeten `fortschritt` gilt ein Gewerk ab seinem Start als planmäßig laufend (zeitanteilig, höchstens 90 %). Verzug = größter Rückstand eines nicht abgehakten Gewerks nach seinem Plan-Ende. Prognose Bauende = letztes Plan-Ende plus dieser Verzug.
 
 ## Titelbild
 
