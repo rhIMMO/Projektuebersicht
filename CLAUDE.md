@@ -95,6 +95,29 @@ Eintrag: `{"datum":"JJJJ-MM-TT","typ":"start|verlauf|abschluss","titel":"…","t
 - Alternativ `ekRegel: {"basis":16000,"knkTeile":{"notar":true,"makler":true,"grest":true},"knkVollstaendig":false}`: Eigenkapital = Basis plus die angehakten Teile der Kaufnebenkosten (notar = Notar und Grundbuch, makler = Makler, grest = Grunderwerbsteuer). Solange `knkVollstaendig` false ist, zählen die Planwerte, danach die Rechnungen. Sind Notar, Grundbuch, Makler und Grunderwerbsteuer erfasst, beim Nutzer nachfragen und dann `knkVollstaendig` auf true setzen. Die Nutzer können das auch selbst über „Eckdaten bearbeiten“ einstellen.
 - Planpositionen der Kaufnebenkosten bekommen `teil` (notar, makler, grest). Kostenpositionen der Kategorie `knk` bekommen `knkTeil` mit demselben Wert. Grundbuchkosten zählen zu `notar`.
 
+## Bauzeitenplan
+
+Tab „Bauzeitenplan“ je Projekt und „Bauzeiten im Überblick“ auf der Startseite. Daten stehen im Projekt unter `bauplan`. Fehlt `bauplan` bei einem laufenden Projekt, zeigt die Seite einen Beispielplan mit Hinweis (Funktion `beispielBauplan` in `index.html`).
+
+```json
+"bauplan": {
+  "quelle": "Bauzeitenplan Handwerker, Version vom 14.11.2026",
+  "stand": "JJJJ-MM-TT",
+  "gewerke": [
+    {"name":"Elektro Rohinstallation","firma":"…","start":"JJJJ-MM-TT","ende":"JJJJ-MM-TT","fortschritt":50,"istStart":"JJJJ-MM-TT","istEnde":null,"notiz":"…"}
+  ],
+  "meilensteine": [
+    {"name":"Bauabnahme","datum":"JJJJ-MM-TT","typ":"bau|vertrieb","erreicht":null}
+  ]
+}
+```
+
+- Plan kommt als PDF, Excel oder Foto im Chat. Gewerke, Firmen und Termine genau wie im Plan übernehmen, jedes Projekt einzeln. Kein Standardplan. Vorschlag als Tabelle zeigen, erst nach Bestätigung eintragen.
+- Meilensteine aus dem Plan übernehmen. Fehlen sie, Bauabnahme (Ende des letzten Gewerks) vorschlagen und beim Nutzer nachfragen, dazu Fotos und Homestaging sowie Vermarktungsstart mit `typ: "vertrieb"`.
+- Statusmeldungen („Elektro fertig, Sanitär 60 %“): `fortschritt` setzen, bei fertig `istEnde` = gemeldetes Datum oder heute. `stand` auf heute setzen. Geplante Termine `start` und `ende` nur ändern, wenn ein neuer Plan kommt. Ein erreichter Meilenstein bekommt `erreicht` mit Datum.
+- Neue Planversion: Termine ersetzen, `fortschritt` und `istEnde` erledigter Gewerke behalten, `quelle` und `stand` anpassen.
+- Rechenlogik: Fortschritt gewichtet nach geplanter Dauer in Kalendertagen. Verzug = größter Rückstand eines offenen Gewerks (Ende überschritten oder Start überfällig). Prognose Bauende = letztes Plan-Ende plus dieser Verzug.
+
 ## Titelbild
 
 Foto mit `werkzeuge/daten.py foto pXX <bild>` einbinden und als `titelbild: {"id":"f…","cap":"Außenansicht"}` ins Projekt schreiben. Die Projektkarte zeigt dann dieses Bild. Ohne Titelbild nimmt sie das erste Foto des neuesten Timeline-Eintrags. Nach Abschluss zeigt sie das erste Abschlussfoto.

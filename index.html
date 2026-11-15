@@ -300,6 +300,72 @@ table.gw{width:100%;border-collapse:collapse;font-size:14px}
 .empty{max-width:560px;display:flex;flex-direction:column;gap:12px;align-items:flex-start}
 .empty p{margin:0;color:var(--ink-2)}
 
+/* Bauzeitenplan */
+.bz-state{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:3px 9px;border-radius:99px;white-space:nowrap}
+.bz-state::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor}
+.bz-state.ok{background:var(--good-soft);color:var(--good)}
+.bz-state.late{background:var(--bad-soft);color:var(--bad)}
+.bz-state.wait{background:var(--surface-2);color:var(--ink-2)}
+.gantt{--lab:230px;position:relative}
+.g-head,.g-row{display:grid;grid-template-columns:var(--lab) 1fr;gap:0 16px;align-items:center}
+.g-head{font-size:12px;color:var(--muted);border-bottom:1px solid var(--line);padding-bottom:6px;margin-bottom:4px}
+.g-axis{position:relative;height:18px}
+.g-axis span{position:absolute;top:0;padding-left:5px;border-left:1px solid var(--line);white-space:nowrap;line-height:18px}
+.g-row{padding:7px 0;border-bottom:1px solid var(--line)}
+.g-row:last-child{border-bottom:0}
+.g-lab{min-width:0}
+.g-lab b{display:block;font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.g-lab span{display:block;font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.g-lab .late{color:var(--bad);font-weight:600}
+.g-track{position:relative;height:22px}
+.g-grid{position:absolute;top:-7px;bottom:-7px;width:1px;background:var(--line);opacity:.6}
+.g-bar{position:absolute;top:3px;height:16px;border-radius:4px;background:var(--surface-2);box-shadow:inset 0 0 0 1px var(--line);overflow:hidden;min-width:4px}
+.g-bar>i{position:absolute;left:0;top:0;bottom:0;border-radius:4px 0 0 4px}
+.g-bar.fertig>i{background:var(--good);border-radius:4px}
+.g-bar.laeuft>i{background:var(--accent)}
+.g-bar.late{box-shadow:inset 0 0 0 1.5px var(--bad)}
+.g-bar.late>i{background:var(--bad)}
+.g-ist{position:absolute;top:9px;height:4px;border-radius:2px;background:var(--bad);opacity:.55}
+.g-today{position:absolute;top:-7px;bottom:-7px;width:2px;margin-left:-1px;background:var(--ink);z-index:2}
+.g-today-l{position:absolute;top:0;transform:translateX(-50%);font-size:11px;font-weight:700;color:var(--surface);background:var(--ink);padding:0 6px;border-radius:4px;line-height:18px;z-index:3;white-space:nowrap}
+.g-ms{position:absolute;top:4px;width:13px;height:13px;margin-left:-6.5px;transform:rotate(45deg);border-radius:2px;background:var(--surface);border:2px solid var(--ink-2);z-index:3}
+.g-ms.done{background:var(--good);border-color:var(--good)}
+.g-ms.late{border-color:var(--bad)}
+.g-legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:12.5px;color:var(--ink-2);margin-top:14px}
+.g-legend span{display:inline-flex;align-items:center;gap:6px}
+.g-legend i{display:inline-block;width:16px;height:9px;border-radius:3px}
+.g-legend i.d{width:10px;height:10px;transform:rotate(45deg);border-radius:2px;border:2px solid var(--ink-2)}
+@media (max-width:640px){.g-head,.g-row{grid-template-columns:1fr}.g-head>div:first-child{display:none}.g-lab{display:flex;justify-content:space-between;gap:10px;margin-bottom:4px}.g-lab span{text-align:right}.g-track .g-grid,.g-track .g-today{top:-2px;bottom:-2px}}
+.ms-list{list-style:none;margin:0;padding:0}
+.ms-list li{display:grid;grid-template-columns:18px 1fr auto;gap:2px 12px;align-items:start;padding:11px 0;border-bottom:1px solid var(--line)}
+.ms-list li:last-child{border-bottom:0}
+.ms-list .dia{width:11px;height:11px;margin:5px 0 0 3px;transform:rotate(45deg);border-radius:2px;border:2px solid var(--ink-2)}
+.ms-list .dia.done{background:var(--good);border-color:var(--good)}
+.ms-list .dia.late{border-color:var(--bad)}
+.ms-list .nm{font-weight:600}
+.ms-list .sb{font-size:12.5px;color:var(--muted)}
+.ms-list .dt{text-align:right;font-variant-numeric:tabular-nums;font-size:14px;white-space:nowrap}
+.ms-list .dt small{display:block;font-size:12px;color:var(--muted)}
+.ms-list .late{color:var(--bad);font-weight:600}
+.ms-list .ok{color:var(--good);font-weight:600}
+.steps{margin:0;padding-left:20px;color:var(--ink-2);font-size:14px;display:flex;flex-direction:column;gap:6px}
+/* Portfolio auf der Startseite */
+.pf{margin-bottom:36px}
+.pf-row{display:grid;grid-template-columns:200px 1fr 150px;gap:6px 18px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line);text-decoration:none}
+.pf-row:last-child{border-bottom:0}
+.pf-row:hover .addr2{color:var(--accent)}
+.addr2{font-weight:600}
+.pf-row .sb{font-size:12.5px;color:var(--muted)}
+.pf-track{position:relative;height:20px}
+.pf-seg{position:absolute;top:3px;height:14px;border-radius:3px;background:var(--line);box-shadow:0 0 0 1px var(--surface)}
+.pf-seg.fertig{background:var(--good)}
+.pf-seg.laeuft{background:var(--accent)}
+.pf-seg.late{background:var(--bad)}
+.pf-r{text-align:right;display:flex;flex-direction:column;align-items:flex-end;gap:3px}
+.pf-r b{font-size:18px;font-variant-numeric:tabular-nums}
+@media (max-width:760px){.pf-row{grid-template-columns:1fr auto}.pf-track{grid-column:1 / 3;grid-row:2}}
+.bz-line{display:flex;justify-content:space-between;gap:10px;font-size:12.5px;color:var(--ink-2)}
+
 /* Neues Projekt */
 .sub{color:var(--ink-2);margin:8px 0 0;max-width:65ch}
 .form-grid{display:grid;grid-template-columns:1fr 340px;gap:16px;align-items:start}
@@ -621,6 +687,7 @@ function renderStart(){
     ${stat('Realisierter Gewinn vor Steuern', e0(realisiert))}
     ${stat('Gesamtumsatz aus Verkäufen', e0(umsatz))}
   </div>
+  ${renderBauPortfolio(lauf)}
   <div class="section-h"><h2>Laufend</h2><span class="count">${lauf.length}</span></div>
   <div class="cards">${lauf.map(card).join('')}
     <a class="addcard" href="#neu"><b>Neues Projekt</b><span>Im Claude-Chat die ausgefüllte Fix-and-Flip-Excel schicken. Oder hier die wichtigsten Daten eingeben und den erzeugten Text an Claude schicken.</span><span class="go">Daten eingeben</span></a>
@@ -631,10 +698,15 @@ function renderStart(){
     <h2>So wird die Seite gepflegt</h2>
     <div class="howto-grid">
       <div><b><span class="n">1</span>Rechnung erfassen</b>Rechnung im OneDrive in „11_Projektdokumentation &amp; Rechnungen“ unter „00_Eingang“ ablegen. Im Claude-Chat „Neue Belege verarbeiten“ schreiben. Claude liest aus, ordnet zu und legt die Datei im Projektordner nach Rechnungsdatum ab.</div>
-      <div><b><span class="n">2</span>Fortschritt dokumentieren</b>Fotos und ein paar Stichworte schicken. Daraus wird ein datierter Eintrag in der Timeline.</div>
+      <div><b><span class="n">2</span>Fortschritt dokumentieren</b>Fotos und ein paar Stichworte schicken. Daraus wird ein datierter Eintrag in der Timeline. Den Bauzeitenplan des Handwerkers und kurze Statusmeldungen wie „Elektro fertig“ ebenfalls im Chat schicken.</div>
       <div><b><span class="n">3</span>Projekt abschließen</b>Verkaufspreis, Verkaufsdatum und Abschlussfotos schicken. Gewinnermittlung und Abschlussbericht laufen dann auf Ist-Werten.</div>
     </div>
   </section>`;
+}
+function bauZeile(p){
+  const bp = bauplanVon(p); if(!bp) return '';
+  const b = bauCalc(bp);
+  return `<div><div class="mrow"><span>Baufortschritt${bp.beispiel?' (Beispiel)':''}</span><span class="num">${pc(b.ist,0)}</span></div><div class="meter"><span style="width:${b.ist*100}%"></span></div><div class="bz-line" style="margin-top:6px"><span>${b.aktuell.length?esc(b.aktuell[0].name)+(b.aktuell.length>1?' und weitere':''):b.fertig?'Bau fertig':'Pause'}</span>${bzState(b)}</div></div>`;
 }
 function card({p,c}){
   const done = p.status==='abgeschlossen';
@@ -648,6 +720,7 @@ function card({p,c}){
     <div class="pcard-img">${cov ? `<img data-foto="${cov.key}" alt="${esc(cov.f.cap)}">` : '<div class="ph-empty">Noch keine Fotos</div>'}${statusPill(p)}</div>
     <div class="pcard-body">
       <div><div class="addr">${esc(p.adresse)}</div><div class="loc">${p.stadtteil}, ${p.ort} · ${m2(p.wohnflaeche)}${p.zimmer?' · '+p.zimmer.toLocaleString('de-DE')+' Zimmer':''}</div></div>
+      ${done ? '' : bauZeile(p)}
       ${done ? '' : `<div><div class="mrow"><span>Kosten bisher im Verhältnis zum Plan</span><span class="num">${pc(share,0)}</span></div><div class="meter"><span style="width:${Math.min(100,share*100)}%"></span></div></div>`}
       <div class="kv">${kv.map(([k,v])=>`<div><div class="k">${k}</div><div class="v num">${v}</div></div>`).join('')}</div>
       <div class="upd">${last ? 'Letzter Eintrag '+fd(last) : 'Noch keine Einträge'}</div>
@@ -656,10 +729,10 @@ function card({p,c}){
 }
 
 /* ============ Projektseite ============ */
-const TABS = [['kosten','Kosten','Kosten'],['doku','Dokumentation','Doku'],['gewinn','Gewinnermittlung','Gewinn'],['bericht','Abschlussbericht','Bericht']];
+const TABS = [['kosten','Kosten','Kosten'],['doku','Dokumentation','Doku'],['bau','Bauzeitenplan','Bau'],['gewinn','Gewinnermittlung','Gewinn'],['bericht','Abschlussbericht','Bericht']];
 function renderProjekt(p, tab){
   const c = calc(p);
-  const body = tab==='kosten' ? renderKosten(p,c) : tab==='doku' ? renderDoku(p) : tab==='gewinn' ? renderGewinn(p,c) : renderBericht(p,c);
+  const body = tab==='kosten' ? renderKosten(p,c) : tab==='doku' ? renderDoku(p) : tab==='bau' ? renderBau(p) : tab==='gewinn' ? renderGewinn(p,c) : renderBericht(p,c);
   const facts = [
     [p.objekt, p.lage].filter(Boolean).join(', '),
     `<b>${m2(p.wohnflaeche)}</b>`,
@@ -764,6 +837,168 @@ function renderDoku(p){
       </div></li>`;
   }).join('')}</ol>
   <p class="hint">Neuer Eintrag: Fotos und ein paar Stichworte im Claude-Chat schicken. Der erste Eintrag mit Fotos ist der Projektstart, der Eintrag mit den Abschlussfotos der Projektabschluss. Beide landen im Abschlussbericht.</p>`;
+}
+
+/* ============ Bauzeitenplan ============ */
+const isoD = d => d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+const addD = (s,n) => { const d = pd(s); d.setDate(d.getDate()+n); return isoD(d); };
+const dDiff = (a,b) => Math.round((pd(b)-pd(a))/864e5);
+const fdk = s => { const d = pd(s); return String(d.getDate()).padStart(2,'0')+'.'+String(d.getMonth()+1).padStart(2,'0')+'.'; };
+const tage = n => n===1 ? '1 Tag' : n+' Tage';
+const HEUTE = () => isoD(new Date());
+
+/* Beispielplan, solange für ein laufendes Projekt noch kein echter Bauzeitenplan hinterlegt ist.
+   Liegt relativ zum Ankauf und wird durch p.bauplan ersetzt. */
+function beispielBauplan(p){
+  const a = addD(p.ankauf, 17), t = HEUTE();
+  const G = [
+    ['Entkernung und Abriss', 0, 26],
+    ['Elektro Rohinstallation', 28, 39],
+    ['Sanitär Rohinstallation', 28, 39],
+    ['Trockenbau und Putz', 42, 53],
+    ['Estrich und Trocknung', 56, 76],
+    ['Fliesen Bad und Küche', 84, 95],
+    ['Malerarbeiten', 91, 102],
+    ['Bodenbeläge', 105, 109],
+    ['Feininstallation Elektro und Sanitär', 112, 116],
+    ['Küche einbauen', 119, 121],
+    ['Endreinigung und Abnahme', 122, 123],
+  ];
+  const gewerke = G.map(([name,s,e],i)=>{
+    const start = addD(a,s), ende = addD(a,e);
+    const dur = dDiff(start,ende)+1, done = dDiff(start,t)+1;
+    let f = Math.max(0, Math.min(100, Math.round(done/dur*100)));
+    if(i===2 && f>0 && f<100) f = Math.round(f*0.7);
+    if(f>=100) return {name, start, ende, istEnde: ende, fortschritt:100};
+    return {name, start, ende, fortschritt: f};
+  });
+  const ms = [
+    ['Rohinstallation fertig', 39, 'bau'], ['Estrich belegreif', 76, 'bau'],
+    ['Bauabnahme', 123, 'bau'], ['Fotos und Homestaging', 130, 'vertrieb'], ['Vermarktungsstart', 133, 'vertrieb'],
+  ].map(([name,o,typ])=>{ const datum = addD(a,o); return {name, datum, typ, erreicht: datum<t && typ==='bau' && o<=39 && gewerke[1].fortschritt>=100 && gewerke[2].fortschritt>=100 ? datum : null}; });
+  return {beispiel:true, quelle:'Beispielplan', stand:t, gewerke, meilensteine:ms};
+}
+function bauplanVon(p){
+  if(p.bauplan && p.bauplan.gewerke && p.bauplan.gewerke.length) return p.bauplan;
+  if(p.status==='laufend') return beispielBauplan(p);
+  return null;
+}
+function bauCalc(bp){
+  const t = HEUTE();
+  const gw = bp.gewerke.map((g,i)=>{
+    const f = g.istEnde ? 100 : Math.max(0, Math.min(100, g.fortschritt||0));
+    const dur = dDiff(g.start,g.ende)+1;
+    const status = f>=100 ? 'fertig' : (f>0 || g.istStart) ? 'laeuft' : 'offen';
+    let verzug = 0, grund = '';
+    if(status==='fertig'){ verzug = Math.max(0, dDiff(g.ende, g.istEnde||g.ende)); if(verzug) grund = `${tage(verzug)} später fertig`; }
+    else if(t>g.ende){ verzug = dDiff(g.ende,t); grund = `${tage(verzug)} über Plan`; }
+    else if(status==='offen' && t>g.start){ verzug = dDiff(g.start,t); grund = `Start ${tage(verzug)} überfällig`; }
+    const soll = Math.max(0, Math.min(1, (dDiff(g.start,t)+1)/dur));
+    return {...g, i, f, dur, status, verzug, grund, soll, late: verzug>0 && status!=='fertig'};
+  });
+  const sumD = gw.reduce((s,g)=>s+g.dur,0) || 1;
+  const ist = gw.reduce((s,g)=>s+g.f/100*g.dur,0)/sumD;
+  const soll = gw.reduce((s,g)=>s+g.soll*g.dur,0)/sumD;
+  const offeneVerzug = Math.max(0, ...gw.filter(g=>g.status!=='fertig').map(g=>g.verzug));
+  const start = gw.map(g=>g.start).sort()[0];
+  const planEnde = gw.map(g=>g.ende).sort().pop();
+  const fertig = gw.every(g=>g.status==='fertig');
+  const istEnde = fertig ? gw.map(g=>g.istEnde||g.ende).sort().pop() : null;
+  const prognose = istEnde || addD(planEnde, offeneVerzug);
+  const aktuell = gw.filter(g=>g.status==='laeuft');
+  const naechstes = gw.filter(g=>g.status==='offen').sort((a,b)=>a.start.localeCompare(b.start))[0] || null;
+  const ms = (bp.meilensteine||[]).map(m=>({...m, late: !m.erreicht && t>m.datum})).sort((a,b)=>a.datum.localeCompare(b.datum));
+  const nextMs = ms.find(m=>!m.erreicht) || null;
+  const verzug = dDiff(planEnde, prognose);
+  return {t, gw, ist, soll, start, planEnde, prognose, verzug, fertig, aktuell, naechstes, ms, nextMs};
+}
+const bzState = b => b.fertig ? `<span class="bz-state ok">Bau fertig</span>` : b.verzug>0 ? `<span class="bz-state late">${tage(b.verzug)} Verzug</span>` : b.ist>0 ? `<span class="bz-state ok">Im Plan</span>` : `<span class="bz-state wait">Noch nicht begonnen</span>`;
+function relTage(t, d){ const n = dDiff(t,d); return n===0 ? 'heute' : n>0 ? `in ${tage(n)}` : `vor ${tage(-n)}`; }
+
+function axisTicks(a, b){
+  const out = [], d = pd(a); d.setDate(1); d.setMonth(d.getMonth()+1);
+  while(isoD(d) <= b){ out.push(isoD(d)); d.setMonth(d.getMonth()+1); }
+  return out;
+}
+function renderBau(p){
+  const bp = bauplanVon(p);
+  if(!bp) return `<div class="card empty"><h2>Kein Bauzeitenplan hinterlegt</h2><p>Den Bauzeitenplan des Handwerkers als PDF, Excel oder Foto im Claude-Chat schicken. Claude überträgt Gewerke, Termine und Meilensteine projektscharf.</p></div>`;
+  const b = bauCalc(bp);
+  const lo = addD([b.start, ...b.ms.map(m=>m.datum)].sort()[0], -3);
+  const hi = addD([b.prognose, ...b.ms.map(m=>m.datum), ...b.gw.map(g=>g.istEnde||g.ende)].sort().pop(), 4);
+  const span = dDiff(lo,hi);
+  const X = s => (dDiff(lo,s)/span*100).toFixed(2);
+  const W = (a,e) => ((dDiff(a,e)+1)/span*100).toFixed(2);
+  const ticks = axisTicks(lo,hi);
+  const showToday = b.t>=lo && b.t<=hi;
+  const grid = ticks.map(m=>`<span class="g-grid" style="left:${X(m)}%"></span>`).join('');
+  const today = showToday ? `<span class="g-today" style="left:${X(b.t)}%"></span>` : '';
+  const sub = g => g.status==='fertig' ? `Fertig ${fdk(g.istEnde||g.ende)}${g.verzug?` · <span class="late">${g.grund}</span>`:''}` : g.late ? `<span class="late">${g.grund}</span> · ${g.f} %` : g.status==='laeuft' ? `Läuft · ${g.f} %` : `${fdk(g.start)} bis ${fdk(g.ende)}`;
+  const rows = b.gw.map(g=>{
+    const cls = g.status + (g.late?' late':'');
+    const tipTxt = `${esc(g.name)}|Plan ${fd(g.start)} bis ${fd(g.ende)} · ${g.f} %${g.firma?' · '+esc(g.firma):''}${g.grund?' · '+g.grund:''}`;
+    const over = g.late ? `<span class="g-ist" style="left:${X(addD(g.ende,1))}%;width:${W(addD(g.ende,1), b.t)}%"></span>` : (g.status==='fertig' && g.verzug) ? `<span class="g-ist" style="left:${X(addD(g.ende,1))}%;width:${W(addD(g.ende,1), g.istEnde)}%"></span>` : '';
+    return `<div class="g-row"><div class="g-lab"><b>${esc(g.name)}</b><span>${g.firma?esc(g.firma)+' · ':''}${sub(g)}</span></div>
+      <div class="g-track">${grid}${today}<span class="g-bar ${cls}" style="left:${X(g.start)}%;width:${W(g.start,g.ende)}%" data-tip="${tipTxt}"><i style="width:${g.f}%"></i></span>${over}</div></div>`;
+  }).join('');
+  const msRow = b.ms.length ? `<div class="g-row"><div class="g-lab"><b>Meilensteine</b><span>${b.ms.filter(m=>m.erreicht).length} von ${b.ms.length} erreicht</span></div>
+      <div class="g-track">${grid}${today}${b.ms.map(m=>`<span class="g-ms ${m.erreicht?'done':m.late?'late':''}" style="left:${X(m.datum)}%" data-tip="${esc(m.name)}|${fd(m.datum)} · ${m.erreicht?'erreicht':m.late?'überfällig':relTage(b.t,m.datum)}"></span>`).join('')}</div></div>` : '';
+  const head = `<div class="g-head"><div></div><div class="g-axis">${ticks.map(m=>`<span style="left:${X(m)}%">${MON[pd(m).getMonth()]}${pd(m).getMonth()===0?' '+pd(m).getFullYear():''}</span>`).join('')}${showToday?`<span class="g-today-l" style="left:${X(b.t)}%;border:0;padding:0 6px">Heute</span>`:''}</div></div>`;
+
+  const tile = (l,v,d) => `<div class="tile"><div class="l">${l}</div><div class="v">${v}</div><div class="d">${d}</div></div>`;
+  const diff = Math.round((b.ist-b.soll)*100);
+  const akt = b.aktuell.length ? b.aktuell.map(g=>g.name).join(', ') : b.fertig ? 'Bau abgeschlossen' : b.naechstes ? 'Pause bis '+fdk(b.naechstes.start) : '–';
+  const tiles = `<div class="tiles">
+    ${tile('Baufortschritt', `<span class="num">${pc(b.ist,0)}</span>`, `Soll heute ${pc(b.soll,0)} · ${diff===0?'genau im Soll':dl(diff,true,v=>v+' Pkt.')}`)}
+    ${tile('Gerade dran', `<span style="font-size:17px;line-height:1.3;display:block">${esc(akt)}</span>`, b.naechstes ? `Danach ${esc(b.naechstes.name)} ab ${fdk(b.naechstes.start)}` : 'Keine offenen Gewerke')}
+    ${tile('Nächster Meilenstein', b.nextMs ? `<span style="font-size:17px;line-height:1.3;display:block">${esc(b.nextMs.name)}</span>` : '–', b.nextMs ? `${fd(b.nextMs.datum)} · ${b.nextMs.late?'<span class="delta neg">überfällig</span>':relTage(b.t,b.nextMs.datum)}` : 'Alle erreicht')}
+    ${tile(b.fertig?'Bau fertig seit':'Fertigstellung Bau', `<span class="num">${fd(b.prognose)}</span>`, b.fertig ? `Plan ${fd(b.planEnde)}` : b.verzug>0 ? `Plan ${fd(b.planEnde)} · <span class="delta neg">+${tage(b.verzug)}</span>` : `Im Plan · ${relTage(b.t,b.planEnde)}`)}
+  </div>`;
+
+  const msList = b.ms.length ? `<div class="card"><div class="card-head"><h2>Meilensteine</h2><span class="muted">${b.ms.filter(m=>m.erreicht).length} von ${b.ms.length}</span></div>
+    <ul class="ms-list">${b.ms.map(m=>`<li><span class="dia ${m.erreicht?'done':m.late?'late':''}"></span><div><div class="nm">${esc(m.name)}</div><div class="sb">${m.typ==='vertrieb'?'Vermarktung':'Bau'}</div></div>
+      <div class="dt">${fd(m.datum)}<small class="${m.erreicht?'ok':m.late?'late':''}">${m.erreicht ? (m.erreicht>m.datum?`erreicht ${fdk(m.erreicht)}, ${tage(dDiff(m.datum,m.erreicht))} später`:`erreicht ${fdk(m.erreicht)}`) : m.late ? 'überfällig' : relTage(b.t,m.datum)}</small></div></li>`).join('')}</ul></div>` : '';
+  const howto = `<div class="card"><h2 style="margin-bottom:12px">So bleibt der Plan aktuell</h2>
+    <ol class="steps">
+      <li><b>Plan hochladen.</b> Den Bauzeitenplan des Handwerkers als PDF, Excel oder Foto im Claude-Chat schicken. Claude übernimmt Gewerke, Firmen, Termine und Meilensteine genau für dieses Projekt.</li>
+      <li><b>Stand melden.</b> Kurz schreiben, zum Beispiel „Elektro fertig, Sanitär 60 %, Fliesen starten erst am 12.01.“. Claude trägt Fortschritt und Ist-Termine ein.</li>
+      <li><b>Plan geändert.</b> Neue Version schicken. Claude passt die Termine an, schon erledigte Gewerke bleiben erledigt.</li>
+    </ol>
+    <p class="hint">Verzug zählt in Kalendertagen gegenüber dem Plan. Die Prognose verschiebt das Bauende um den größten offenen Verzug.</p></div>`;
+
+  return `${bp.beispiel?`<div class="banner"><b>Vorschlag mit Beispieldaten.</b> Für dieses Projekt ist noch kein Bauzeitenplan hinterlegt. Sobald der Plan des Handwerkers im Chat kommt, ersetzt Claude die Beispielwerte.</div>`:''}
+  ${tiles}
+  <div class="card" style="margin-bottom:16px">
+    <div class="card-head"><h2>Bauzeitenplan</h2><span class="muted">${bp.beispiel?'Beispiel':esc(bp.quelle||'')}${bp.stand?' · Stand '+fd(bp.stand):''}</span></div>
+    <div class="gantt" role="img" aria-label="Bauzeitenplan mit ${b.gw.length} Gewerken, Fortschritt ${pc(b.ist,0)}">${head}${rows}${msRow}</div>
+    <div class="g-legend"><span><i style="background:var(--good)"></i>Fertig</span><span><i style="background:var(--accent)"></i>Läuft, Füllung = Fortschritt</span><span><i style="background:var(--surface-2);box-shadow:inset 0 0 0 1px var(--line)"></i>Geplant</span><span><i style="background:var(--bad)"></i>Verzug</span><span><i class="d"></i>Meilenstein</span><span><i style="width:2px;background:var(--ink)"></i>Heute</span></div>
+  </div>
+  <div class="grid2">${msList}${howto}</div>`;
+}
+
+/* Übersicht aller laufenden Projekte auf der Startseite */
+function renderBauPortfolio(lauf){
+  const rows = lauf.map(({p})=>({p, bp:bauplanVon(p)})).filter(r=>r.bp).map(r=>({...r, b:bauCalc(r.bp)}));
+  if(!rows.length) return '';
+  const lo = addD(rows.map(r=>r.b.start).sort()[0], -3);
+  const hi = addD(rows.map(r=>[r.b.prognose, ...r.b.ms.map(m=>m.datum)].sort().pop()).sort().pop(), 4);
+  const span = dDiff(lo,hi), t = HEUTE();
+  const X = s => (dDiff(lo,s)/span*100).toFixed(2);
+  const W = (a,e) => ((dDiff(a,e)+1)/span*100).toFixed(2);
+  const ticks = axisTicks(lo,hi);
+  const grid = ticks.map(m=>`<span class="g-grid" style="left:${X(m)}%;top:-4px;bottom:-4px"></span>`).join('');
+  const today = t>=lo && t<=hi ? `<span class="g-today" style="left:${X(t)}%;top:-4px;bottom:-4px"></span>` : '';
+  const demo = rows.some(r=>r.bp.beispiel);
+  return `<div class="section-h"><h2>Bauzeiten im Überblick</h2><span class="count">${rows.length}</span></div>
+  <div class="card pf">
+    <div class="pf-row" style="padding-top:0;padding-bottom:6px"><span class="muted" style="font-size:12px">Projekt und aktuelles Gewerk</span><div class="g-axis" style="font-size:12px;color:var(--muted)">${ticks.map(m=>`<span style="left:${X(m)}%">${MON[pd(m).getMonth()]}</span>`).join('')}</div><span class="muted" style="font-size:12px;text-align:right">Fortschritt</span></div>
+    ${rows.map(({p,b,bp})=>`<a class="pf-row" href="#${p.id}--bau">
+      <div><div class="addr2">${esc(p.adresse)}</div><div class="sb">${b.aktuell.length?esc(b.aktuell.map(g=>g.name).join(', ')):b.fertig?'Bau fertig':'Pause'}${bp.beispiel?' · Beispiel':''}</div></div>
+      <div class="pf-track">${grid}${today}${b.gw.map(g=>`<span class="pf-seg ${g.status}${g.late?' late':''}" style="left:${X(g.start)}%;width:${W(g.start,g.ende)}%" data-tip="${esc(g.name)}|${fdk(g.start)} bis ${fdk(g.ende)} · ${g.f} %"></span>`).join('')}${b.nextMs?`<span class="g-ms ${b.nextMs.late?'late':''}" style="left:${X(b.nextMs.datum)}%;top:3px;width:11px;height:11px;margin-left:-5.5px" data-tip="Nächster Meilenstein: ${esc(b.nextMs.name)}|${fd(b.nextMs.datum)} · ${b.nextMs.late?'überfällig':relTage(t,b.nextMs.datum)}"></span>`:''}</div>
+      <div class="pf-r"><b>${pc(b.ist,0)}</b>${bzState(b)}<span class="sb">Bauende ${fd(b.prognose)}</span></div>
+    </a>`).join('')}
+    <p class="hint">Fertig grün, laufend blau, Verzug rot, geplant grau, Raute = nächster Meilenstein, schwarze Linie = heute. Zeile antippen öffnet den Bauzeitenplan des Projekts.${demo?' Projekte mit „Beispiel“ haben noch keinen echten Plan.':''}</p>
+  </div>`;
 }
 
 function renderGewinn(p,c){
