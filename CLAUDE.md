@@ -123,7 +123,7 @@ Tab „Bauzeitenplan“ je Projekt und „Bauzeiten im Überblick“ auf der Sta
 
 ## Ausstattung
 
-Tab „Ausstattung“ je Projekt. Hält fest, welche Produkte verbaut wurden, damit die Nutzer beim nächsten Projekt wissen, was sie genommen haben und was sie wieder nehmen wollen. Hilft bei der Kalkulation.
+Tab „Ausstattung“ je Projekt. Hält fest, welche Produkte verbaut wurden, damit die Nutzer beim nächsten Projekt wissen, was sie genommen haben und was sie wieder nehmen wollen. Je Produkt steht der Preis pro Stück oder Einheit. Das hilft bei der Kalkulation.
 
 - Standardliste steht in `index.html` (`AUS_STANDARD`) und gilt für jedes Projekt: Boden (Parkett / Vinyl, Fliesen), Türen (Innentüren mit Zarge, Türdrücker), Bad (Waschtisch, Waschtischunterschrank, Waschtischarmatur, LED-Spiegel, WC, Duscharmatur, Duschabtrennung, Handtuchheizkörper), Elektro und Licht (Steckdosen und Schalter, Spots, Deckenleuchten), Heizung und Fenster (Heizkörper, Fenster, Fensterbänke). Die Liste nur auf Wunsch der Nutzer ändern.
 - Daten im Projekt unter `ausstattung`. Fehlt es, zeigt die Seite die Standardliste mit Status „Offen“. Gespeichert werden nur Positionen, die jemand angefasst hat.
@@ -132,7 +132,7 @@ Tab „Ausstattung“ je Projekt. Hält fest, welche Produkte verbaut wurden, da
 "ausstattung": {
   "stand": "JJJJ-MM-TT",
   "positionen": [
-    {"key":"parkett","bereich":"boden","name":"Parkett / Vinyl","status":"erneuert","produkt":"Landhausdiele Eiche","hersteller":"…","link":"https://…","artikelnr":"…","farbe":"…","haendler":"…","preis":39.9,"menge":58.5,"einheit":"m²","bewertung":"wieder","alternative":"…","notiz":"…","foto":{"id":"f…"}}
+    {"key":"parkett","bereich":"boden","name":"Parkett / Vinyl","status":"erneuert","produkt":"Landhausdiele Eiche","hersteller":"…","link":"https://…","artikelnr":"…","farbe":"…","haendler":"…","preis":39.9,"einheit":"m²","bewertung":"wieder","alternative":"…","notiz":"…","foto":{"id":"f…"}}
   ]
 }
 ```
@@ -142,7 +142,7 @@ Tab „Ausstattung“ je Projekt. Hält fest, welche Produkte verbaut wurden, da
 - Fotos mit `werkzeuge/daten.py foto pXX <bild>` einbinden und als `foto: {"id":"f…"}` an die Position schreiben.
 - Die Seite speichert selbst (GitHub-Schlüssel, Commit „Ausstattung aktualisiert“): Status antippen, „Bearbeiten“ mit Foto-Upload, „+ Position ergänzen“, „Aus anderem Projekt übernehmen“. Ohne Schlüssel erzeugt sie einen Text „Ausstattung in der Projektübersicht ändern, Projekt pXX …“. Den genau so übernehmen.
 - Schicken die Nutzer einen Produktlink, Namen oder ein Foto im Chat: Produktname, Hersteller, Preis und Artikelnummer ermitteln, Vorschlag zeigen, nach Bestätigung eintragen. Nicht raten.
-- Der Materialwert im Tab ist nur ein Richtwert. Er fließt nicht in `calc` ein. Kosten kommen weiter nur aus Rechnungen.
+- Keine Mengen und keine Summen. Die Preise fließen nicht in `calc` ein. Kosten kommen weiter nur aus Rechnungen.
 
 ## Titelbild
 

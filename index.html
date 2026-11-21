@@ -441,7 +441,6 @@ a.addcard:hover{border-color:var(--accent)}
 .au-foto{width:56px;height:56px;border:0;padding:0;border-radius:8px;overflow:hidden;background:var(--surface-2);cursor:zoom-in}
 .au-foto img{width:100%;height:100%;object-fit:cover;display:block}
 .au-full{grid-column:1 / -1}
-.au-2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .au-fprev{display:flex;gap:12px;align-items:center}
 .au-fprev img{width:72px;height:72px;object-fit:cover;border-radius:8px;background:var(--surface-2)}
 .au-fprev .chk{display:flex;gap:6px;align-items:center;font-size:14px}
@@ -1690,14 +1689,12 @@ function ausPos(o, key){
   }
   return x;
 }
-const ausSumme = x => (x.status === 'erneuert' && x.preis > 0) ? x.preis * (x.menge > 0 ? x.menge : 1) : 0;
 const ausHatDaten = x => !!(x.produkt || x.hersteller || x.link || x.artikelnr || x.farbe || x.haendler || x.preis || x.notiz || x.alternative || x.foto);
 const ausLink = u => /^https?:\/\//i.test(u) ? u : 'https://'+u;
-const ausMenge = x => x.menge > 0 ? `${nf(x.menge)} ${esc(x.einheit || 'Stück')}` : '';
 
 function ausRow(p, x){
   const titel = [x.hersteller, x.produkt].filter(Boolean).map(esc).join(' ');
-  const preis = x.preis > 0 ? `${e2(x.preis)} je ${esc(x.einheit || 'Stück')}${x.menge > 0 ? ` × ${ausMenge(x)} = <b>${e2(x.preis * x.menge)}</b>` : ''}` : (x.menge > 0 ? ausMenge(x) : '');
+  const preis = x.preis > 0 ? `<b>${e2(x.preis)}</b> je ${esc(x.einheit || 'Stück')}` : '';
   const meta = [
     x.farbe ? esc(x.farbe) : '', x.haendler ? 'Händler '+esc(x.haendler) : '', x.artikelnr ? 'Art.-Nr. '+esc(x.artikelnr) : '', preis,
     x.link ? `<a class="au-link" href="${esc(ausLink(x.link))}" target="_blank" rel="noopener">Produkt öffnen ↗</a>` : '',
@@ -1721,31 +1718,19 @@ function ausRow(p, x){
 }
 function renderAusstattung(p){
   const L = ausListe(p);
-  const zahl = s => L.filter(x => x.status === s).length;
-  const summe = L.reduce((s, x) => s + ausSumme(x), 0);
-  const ohnePreis = L.filter(x => x.status === 'erneuert' && !(x.preis > 0)).length;
-  const tile = (l, v, d) => `<div class="tile"><div class="l">${l}</div><div class="v">${v}</div><div class="d">${d}</div></div>`;
-  const tiles = `<div class="tiles">
-    ${tile('Erneuert', `<span class="num">${zahl('erneuert')}</span>`, `von ${L.length} Positionen`)}
-    ${tile('Noch offen', `<span class="num">${zahl('offen')}</span>`, `${zahl('entfaellt')} entfallen`)}
-    ${tile('Materialwert', `<span class="num">${e0(summe)}</span>`, ohnePreis ? `${ohnePreis} erneuerte ohne Preis` : 'aller erneuerten Positionen')}
-    ${tile('Material je m²', `<span class="num">${p.wohnflaeche ? e0(summe / p.wohnflaeche) : '–'}</span>`, `bei ${m2(p.wohnflaeche)} Wohnfläche`)}
-  </div>`;
   const andere = PROJEKTE.filter(q => q.id !== p.id && q.ausstattung && (q.ausstattung.positionen || []).some(x => x.produkt));
   const cards = AUS_BEREICHE.map(([b, bn]) => {
     const rows = L.filter(x => x.bereich === b);
     if(!rows.length) return '';
-    const s = rows.reduce((t, x) => t + ausSumme(x), 0);
-    return `<div class="card au-card"><div class="card-head"><h2>${bn}</h2><span class="muted">${rows.filter(x => x.status === 'erneuert').length} erneuert${s ? ' · '+e0(s) : ''}</span></div>
+    return `<div class="card au-card"><div class="card-head"><h2>${bn}</h2><span class="muted">${rows.filter(x => x.status === 'erneuert').length} erneuert</span></div>
       <ul class="au-list">${rows.map(x => ausRow(p, x)).join('')}</ul></div>`;
   }).join('');
-  return `${tiles}
-  <div class="au-bar">
+  return `<div class="au-bar">
     <p class="muted" style="margin:0">Status antippen speichert sofort. ${p.ausstattung && p.ausstattung.stand ? 'Stand '+fd(p.ausstattung.stand)+'.' : ''}</p>
     <div class="au-bar-r">${andere.length ? `<button class="btn ghost sm" type="button" data-act="aus-import" data-p="${p.id}">Aus anderem Projekt übernehmen</button>` : ''}<button class="btn ghost sm" type="button" data-act="aus-edit" data-p="${p.id}" data-k="">+ Position ergänzen</button></div>
   </div>
   ${cards}
-  <p class="hint">Der Materialwert ist ein Richtwert für die nächste Kalkulation. Er fließt nicht in die Gewinnermittlung, dort zählen nur die Rechnungen. Produkte könnt ihr auch im Claude-Chat schicken, als Link, Name oder Foto.</p>`;
+  <p class="hint">Produkte könnt ihr auch im Claude-Chat schicken, als Link, Name oder Foto.</p>`;
 }
 
 function ausFehler(e){
@@ -1804,7 +1789,7 @@ function ausEdit(pid, key){
         ${sel('status', 'Status', AUS_STATUS, x.status)}
         ${AUS_TEXT.map(([k, l]) => f(k, l, x[k], k === 'link' ? 'type="url" inputmode="url" placeholder="https://…"' : 'type="text"')).join('')}
         ${f('preis', 'Preis je Einheit in € (brutto)', num(x.preis), 'type="text" inputmode="decimal"')}
-        <div class="au-2">${f('menge', 'Menge', num(x.menge), 'type="text" inputmode="decimal"')}${f('einheit', 'Einheit', x.einheit || 'Stück', 'type="text" list="au-einheiten"')}</div>
+        ${f('einheit', 'Einheit', x.einheit || 'Stück', 'type="text" list="au-einheiten"')}
         ${sel('bewertung', 'Bewertung', AUS_BEW, x.bewertung)}
         ${f('alternative', 'Alternative fürs nächste Projekt', x.alternative)}
         <div class="fld au-full"><label for="a-notiz">Notiz</label><div class="inp"><input id="a-notiz" type="text" value="${esc(x.notiz || '')}" autocomplete="off"></div></div>
@@ -1840,19 +1825,18 @@ async function ausSubmit(form){
   const pid = form.dataset.p, key = form.dataset.k, neu = !key;
   const p = PROJEKTE.find(x => x.id === pid), alt = neu ? {} : ausListe(p).find(y => y.key === key);
   const eigen = neu || !alt.std;
-  const preis = parseNum(g('preis')), menge = parseNum(g('menge'));
+  const preis = parseNum(g('preis'));
   const fehler = [];
   if(eigen && !g('name')) fehler.push('Bezeichnung fehlt.');
   if(Number.isNaN(preis)) fehler.push('Beim Preis bitte eine Zahl eintragen.');
-  if(Number.isNaN(menge)) fehler.push('Bei der Menge bitte eine Zahl eintragen.');
   if(fehler.length){ err.textContent = fehler.join(' '); return; }
-  const werte = {status: g('status'), preis, menge, einheit: g('einheit'), bewertung: g('bewertung'), alternative: g('alternative'), notiz: g('notiz')};
+  const werte = {status: g('status'), preis, einheit: g('einheit'), bewertung: g('bewertung'), alternative: g('alternative'), notiz: g('notiz')};
   AUS_TEXT.forEach(([k]) => werte[k] = g(k));
   if(eigen){ werte.name = g('name'); werte.bereich = g('bereich'); }
   if(!ghToken()){
     const zeilen = [];
     const zeig = (k, v) => k === 'status' ? AUS_STMAP[v] : k === 'bewertung' ? (AUS_BEW.find(b => b[0] === v) || ['', ''])[1] : (typeof v === 'number' ? nf(v) : v);
-    const labels = {name:'Bezeichnung', bereich:'Bereich', status:'Status', preis:'Preis je Einheit €', menge:'Menge', einheit:'Einheit', bewertung:'Bewertung', alternative:'Alternative', notiz:'Notiz', ...Object.fromEntries(AUS_TEXT)};
+    const labels = {name:'Bezeichnung', bereich:'Bereich', status:'Status', preis:'Preis je Einheit €', einheit:'Einheit', bewertung:'Bewertung', alternative:'Alternative', notiz:'Notiz', ...Object.fromEntries(AUS_TEXT)};
     Object.entries(werte).forEach(([k, v]) => { const a = alt[k] ?? '', b = v ?? ''; if(String(a) !== String(b)) zeilen.push(`${labels[k]}: ${a === '' ? 'leer' : zeig(k, a)} → ${b === '' ? 'leer' : zeig(k, b)}`); });
     if(!zeilen.length){ err.textContent = 'Es wurde nichts geändert.'; return; }
     const txt = `Ausstattung in der Projektübersicht ${neu ? 'ergänzen' : 'ändern'}, Projekt ${p.id} (${p.adresse}), Position „${neu ? werte.name : alt.name}“:\n` + zeilen.map(z => '- '+z).join('\n');
