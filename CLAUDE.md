@@ -121,6 +121,29 @@ Tab „Bauzeitenplan“ je Projekt und „Bauzeiten im Überblick“ auf der Sta
 - Mit GitHub-Schlüssel lädt die Seite nach dem Start alle Projekte zusätzlich direkt über die GitHub-API. So sind gespeicherte Änderungen sofort sichtbar, ohne auf GitHub Pages zu warten.
 - Rechenlogik: Fortschritt gewichtet nach geplanter Dauer in Kalendertagen. Ohne gemeldeten `fortschritt` gilt ein Gewerk ab seinem Start als planmäßig laufend (zeitanteilig, höchstens 90 %). Verzug = größter Rückstand eines nicht abgehakten Gewerks nach seinem Plan-Ende. Prognose Bauende = letztes Plan-Ende plus dieser Verzug.
 
+## Ausstattung
+
+Tab „Ausstattung“ je Projekt. Hält fest, welche Produkte verbaut wurden, damit die Nutzer beim nächsten Projekt wissen, was sie genommen haben und was sie wieder nehmen wollen. Hilft bei der Kalkulation.
+
+- Standardliste steht in `index.html` (`AUS_STANDARD`) und gilt für jedes Projekt: Boden (Parkett / Vinyl, Sockelleisten, Fliesen), Türen (Innentüren mit Zarge, Türdrücker), Bad (Waschtisch, Waschtischunterschrank, Waschtischarmatur, LED-Spiegel, WC, Duscharmatur, Duschabtrennung, Handtuchheizkörper, Badaccessoires), Elektro und Licht (Steckdosen und Schalter, Spots, Deckenleuchten), Heizung und Fenster (Heizkörper, Fenster, Fensterbänke). Die Liste nur auf Wunsch der Nutzer ändern.
+- Daten im Projekt unter `ausstattung`. Fehlt es, zeigt die Seite die Standardliste mit Status „Offen“. Gespeichert werden nur Positionen, die jemand angefasst hat.
+
+```json
+"ausstattung": {
+  "stand": "JJJJ-MM-TT",
+  "positionen": [
+    {"key":"parkett","bereich":"boden","name":"Parkett / Vinyl","status":"erneuert","produkt":"Landhausdiele Eiche","hersteller":"…","link":"https://…","artikelnr":"…","farbe":"…","haendler":"…","preis":39.9,"menge":58.5,"einheit":"m²","bewertung":"wieder","alternative":"…","notiz":"…","foto":{"id":"f…"}}
+  ]
+}
+```
+
+- `status`: offen, erneuert, bestand, entfaellt. `bewertung`: wieder, ersetzen oder leer. Leere Felder weglassen. `preis` ist brutto je Einheit.
+- Standardpositionen behalten ihren `key` aus `AUS_STANDARD`. Eigene Positionen bekommen einen Schlüssel mit `x-` am Anfang und einen `bereich` (boden, tueren, bad, elektro, heizung, sonstiges).
+- Fotos mit `werkzeuge/daten.py foto pXX <bild>` einbinden und als `foto: {"id":"f…"}` an die Position schreiben.
+- Die Seite speichert selbst (GitHub-Schlüssel, Commit „Ausstattung aktualisiert“): Status antippen, „Bearbeiten“ mit Foto-Upload, „+ Position ergänzen“, „Aus anderem Projekt übernehmen“. Ohne Schlüssel erzeugt sie einen Text „Ausstattung in der Projektübersicht ändern, Projekt pXX …“. Den genau so übernehmen.
+- Schicken die Nutzer einen Produktlink, Namen oder ein Foto im Chat: Produktname, Hersteller, Preis und Artikelnummer ermitteln, Vorschlag zeigen, nach Bestätigung eintragen. Nicht raten.
+- Der Materialwert im Tab ist nur ein Richtwert. Er fließt nicht in `calc` ein. Kosten kommen weiter nur aus Rechnungen.
+
 ## Titelbild
 
 Foto mit `werkzeuge/daten.py foto pXX <bild>` einbinden und als `titelbild: {"id":"f…","cap":"Außenansicht"}` ins Projekt schreiben. Die Projektkarte zeigt dann dieses Bild. Ohne Titelbild nimmt sie das erste Foto des neuesten Timeline-Eintrags. Nach Abschluss zeigt sie das erste Abschlussfoto.

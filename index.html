@@ -132,6 +132,7 @@ main{max-width:1120px;margin:0 auto;padding:18px 16px 72px}
 .tab[aria-selected="true"]{color:var(--ink);border-color:var(--ink)}
 .tab .s{display:none}
 @media (max-width:520px){.tab .l{display:none}.tab .s{display:inline}.tabs{justify-content:space-between}}
+@media (max-width:520px){.tab{padding-left:6px;padding-right:6px;font-size:14px}}
 .grid2{display:grid;grid-template-columns:1.05fr 1fr;gap:16px;margin-bottom:16px}
 @media (max-width:860px){.grid2{grid-template-columns:1fr}}
 .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:20px}
@@ -415,6 +416,37 @@ details[open].fsec>summary{margin-bottom:14px}
 a.addcard{text-decoration:none;cursor:pointer;transition:border-color .15s ease}
 a.addcard:hover{border-color:var(--accent)}
 .addcard .go{color:var(--accent);font-weight:600}
+
+/* Ausstattung */
+.au-bar{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;justify-content:space-between;margin:0 0 14px}
+.au-bar-r{display:flex;flex-wrap:wrap;gap:8px}
+.au-card{margin-bottom:16px}
+.au-list{list-style:none;margin:0;padding:0}
+.au-row{display:grid;grid-template-columns:1fr auto;gap:8px 16px;padding:12px 0;border-bottom:1px solid var(--line);align-items:center}
+.au-row:last-child{border-bottom:0;padding-bottom:0}
+.au-row:has(.au-foto){grid-template-columns:56px 1fr auto}
+.au-nm{font-weight:600}
+.au-own{font-size:11px;font-weight:600;color:var(--muted);border:1px solid var(--line);border-radius:99px;padding:1px 7px;margin-left:4px;vertical-align:1px}
+.au-prod{font-size:14px;color:var(--ink)}
+.au-miss{font-size:13px;color:var(--c4d)}
+.au-meta{display:flex;flex-wrap:wrap;gap:2px 14px;font-size:12.5px;color:var(--muted);margin-top:2px}
+.au-meta b{color:var(--ink-2);font-variant-numeric:tabular-nums}
+.au-link{color:var(--accent);font-weight:600;text-decoration:none}
+.au-bew{font-weight:600}.au-bew.ok{color:var(--good)}.au-bew.bad{color:var(--bad)}
+.au-side{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:flex-end}
+.au-seg button{padding:5px 9px;font-size:12.5px}
+.au-row.st-erneuert .au-seg button[aria-pressed="true"]{background:var(--good-soft);color:var(--good)}
+.au-row.st-offen .au-seg button[aria-pressed="true"]{background:var(--accent-soft);color:var(--accent)}
+.au-row.st-entfaellt .au-nm,.au-row.st-bestand .au-nm{color:var(--ink-2)}
+.au-foto{width:56px;height:56px;border:0;padding:0;border-radius:8px;overflow:hidden;background:var(--surface-2);cursor:zoom-in}
+.au-foto img{width:100%;height:100%;object-fit:cover;display:block}
+.au-full{grid-column:1 / -1}
+.au-2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.au-fprev{display:flex;gap:12px;align-items:center}
+.au-fprev img{width:72px;height:72px;object-fit:cover;border-radius:8px;background:var(--surface-2)}
+.au-fprev .chk{display:flex;gap:6px;align-items:center;font-size:14px}
+.au-file{font-size:14px}
+@media (max-width:640px){.au-row,.au-row:has(.au-foto){grid-template-columns:1fr}.au-row:has(.au-foto){grid-template-columns:56px 1fr}.au-side{grid-column:1 / -1;justify-content:space-between}}
 
 /* Overlays */
 .lb{position:fixed;inset:0;z-index:60;background:rgba(8,10,12,.94);display:none;flex-direction:column;align-items:center;justify-content:center;padding:56px 16px 24px;gap:12px}
@@ -761,10 +793,10 @@ function card({p,c}){
 }
 
 /* ============ Projektseite ============ */
-const TABS = [['kosten','Kosten','Kosten'],['doku','Dokumentation','Doku'],['bau','Bauzeitenplan','Bau'],['gewinn','Gewinnermittlung','Gewinn'],['bericht','Abschlussbericht','Bericht']];
+const TABS = [['kosten','Kosten','Kosten'],['doku','Dokumentation','Doku'],['bau','Bauzeitenplan','Bau'],['aus','Ausstattung','Ausst.'],['gewinn','Gewinnermittlung','Gewinn'],['bericht','Abschlussbericht','Bericht']];
 function renderProjekt(p, tab){
   const c = calc(p);
-  const body = tab==='kosten' ? renderKosten(p,c) : tab==='doku' ? renderDoku(p) : tab==='bau' ? renderBau(p) : tab==='gewinn' ? renderGewinn(p,c) : renderBericht(p,c);
+  const body = tab==='kosten' ? renderKosten(p,c) : tab==='doku' ? renderDoku(p) : tab==='bau' ? renderBau(p) : tab==='aus' ? renderAusstattung(p) : tab==='gewinn' ? renderGewinn(p,c) : renderBericht(p,c);
   const facts = [
     [p.objekt, p.lage].filter(Boolean).join(', '),
     `<b>${m2(p.wohnflaeche)}</b>`,
@@ -1619,6 +1651,286 @@ document.addEventListener('input', e => {
 document.addEventListener('input', e => { const r = e.target.closest && e.target.closest('.pe-m'); if(r) r.classList.toggle('done', !!r.querySelector('.pem-erreicht').value); });
 window.addEventListener('beforeunload', e => { if(BZ_PENDING){ e.preventDefault(); e.returnValue = ''; } });
 
+/* ============ Ausstattung: verbaute Produkte je Projekt ============ */
+const AUS_BEREICHE = [['boden','Boden'],['tueren','Türen'],['bad','Bad'],['elektro','Elektro und Licht'],['heizung','Heizung und Fenster'],['sonstiges','Sonstiges']];
+const AUS_STANDARD = [
+  ['parkett','boden','Parkett / Vinyl','m²'], ['sockel','boden','Sockelleisten','m'], ['fliesen','boden','Fliesen','m²'],
+  ['tueren','tueren','Innentüren mit Zarge','Stück'], ['druecker','tueren','Türdrücker','Stück'],
+  ['waschtisch','bad','Waschtisch','Stück'], ['wt-unterschrank','bad','Waschtischunterschrank','Stück'], ['wt-armatur','bad','Waschtischarmatur','Stück'],
+  ['spiegel','bad','LED-Spiegel','Stück'], ['wc','bad','WC','Stück'], ['dusch-armatur','bad','Duscharmatur','Stück'],
+  ['duschabtrennung','bad','Duschabtrennung','Stück'], ['handtuchheizkoerper','bad','Handtuchheizkörper','Stück'], ['bad-acc','bad','Badaccessoires','Set'],
+  ['schalter','elektro','Steckdosen und Schalter (Serie)','Stück'], ['spots','elektro','Spots','Stück'], ['deckenleuchten','elektro','Deckenleuchten','Stück'],
+  ['heizkoerper','heizung','Heizkörper','Stück'], ['fenster','heizung','Fenster','Stück'], ['fensterbaenke','heizung','Fensterbänke','Stück'],
+].map(([key, bereich, name, einheit]) => ({key, bereich, name, einheit}));
+const AUS_STATUS = [['offen','Offen'],['erneuert','Erneuert'],['bestand','Bestand'],['entfaellt','Entfällt']];
+const AUS_STMAP = Object.fromEntries(AUS_STATUS);
+const AUS_BEW = [['','Keine Angabe'],['wieder','Wieder nehmen'],['ersetzen','Nächstes Mal ersetzen']];
+const AUS_TEXT = [['produkt','Produktname'],['hersteller','Hersteller'],['link','Link'],['artikelnr','Artikelnummer'],['farbe','Farbe oder Oberfläche'],['haendler','Händler']];
+const AUS_COPY = ['produkt','hersteller','link','artikelnr','farbe','haendler','preis','einheit'];
+let AUS_PENDING = 0;
+
+function ausListe(p){
+  const gesp = (p.ausstattung && p.ausstattung.positionen) || [];
+  const byKey = new Map(gesp.map(x => [x.key, x]));
+  const std = AUS_STANDARD.map(s => ({...s, status:'offen', ...(byKey.get(s.key) || {}), std:true}));
+  const eigene = gesp.filter(x => !AUS_STANDARD.some(s => s.key === x.key)).map(x => ({status:'offen', ...x, bereich: AUS_BEREICHE.some(b => b[0] === x.bereich) ? x.bereich : 'sonstiges'}));
+  return [...std, ...eigene];
+}
+/* Position im gespeicherten Objekt holen. Standardpositionen werden beim ersten Speichern angelegt. */
+function ausPos(o, key){
+  o.ausstattung = o.ausstattung || {positionen:[]};
+  const P = o.ausstattung.positionen = o.ausstattung.positionen || [];
+  let x = P.find(y => y.key === key);
+  if(!x){
+    const s = AUS_STANDARD.find(y => y.key === key);
+    if(!s) throw new Error('Die Position gibt es nicht mehr. Bitte die Seite neu laden.');
+    x = {key:s.key, bereich:s.bereich, name:s.name, einheit:s.einheit, status:'offen'}; P.push(x);
+  }
+  return x;
+}
+const ausSumme = x => (x.status === 'erneuert' && x.preis > 0) ? x.preis * (x.menge > 0 ? x.menge : 1) : 0;
+const ausHatDaten = x => !!(x.produkt || x.hersteller || x.link || x.artikelnr || x.farbe || x.haendler || x.preis || x.notiz || x.alternative || x.foto);
+const ausLink = u => /^https?:\/\//i.test(u) ? u : 'https://'+u;
+const ausMenge = x => x.menge > 0 ? `${nf(x.menge)} ${esc(x.einheit || 'Stück')}` : '';
+
+function ausRow(p, x){
+  const titel = [x.hersteller, x.produkt].filter(Boolean).map(esc).join(' ');
+  const preis = x.preis > 0 ? `${e2(x.preis)} je ${esc(x.einheit || 'Stück')}${x.menge > 0 ? ` × ${ausMenge(x)} = <b>${e2(x.preis * x.menge)}</b>` : ''}` : (x.menge > 0 ? ausMenge(x) : '');
+  const meta = [
+    x.farbe ? esc(x.farbe) : '', x.haendler ? 'Händler '+esc(x.haendler) : '', x.artikelnr ? 'Art.-Nr. '+esc(x.artikelnr) : '', preis,
+    x.link ? `<a class="au-link" href="${esc(ausLink(x.link))}" target="_blank" rel="noopener">Produkt öffnen ↗</a>` : '',
+  ].filter(Boolean);
+  const bew = x.bewertung === 'wieder' ? '<span class="au-bew ok">Wieder nehmen</span>'
+    : x.bewertung === 'ersetzen' ? `<span class="au-bew bad">Ersetzen${x.alternative ? ': '+esc(x.alternative) : ''}</span>` : '';
+  const leer = x.status === 'erneuert' && !titel ? '<span class="au-miss">Produkt noch nicht eingetragen</span>' : '';
+  const seg = `<div class="seg au-seg" role="group" aria-label="Status ${esc(x.name)}">${AUS_STATUS.map(([v, l]) =>
+    `<button type="button" data-act="aus-status" data-p="${p.id}" data-k="${esc(x.key)}" data-v="${v}" aria-pressed="${x.status === v}">${l}</button>`).join('')}</div>`;
+  const foto = x.foto && x.foto.id ? `<button class="au-foto" type="button" data-act="aus-foto" data-p="${p.id}" data-k="${esc(x.key)}" aria-label="Foto ${esc(x.name)} vergrößern"><img data-foto="${p.id}/${x.foto.id}_t" alt=""></button>` : '';
+  return `<li class="au-row st-${x.status}">
+    ${foto}
+    <div class="au-main">
+      <div class="au-nm">${esc(x.name)}${x.std ? '' : ' <span class="au-own">eigene</span>'}</div>
+      ${titel ? `<div class="au-prod">${titel}</div>` : leer}
+      ${meta.length ? `<div class="au-meta">${meta.map(m => `<span>${m}</span>`).join('')}</div>` : ''}
+      ${bew || x.notiz ? `<div class="au-meta">${bew}${x.notiz ? `<span>${esc(x.notiz)}</span>` : ''}</div>` : ''}
+    </div>
+    <div class="au-side">${seg}<button class="icobtn" type="button" data-act="aus-edit" data-p="${p.id}" data-k="${esc(x.key)}">${ausHatDaten(x) ? 'Bearbeiten' : 'Produkt eintragen'}</button></div>
+  </li>`;
+}
+function renderAusstattung(p){
+  const L = ausListe(p);
+  const zahl = s => L.filter(x => x.status === s).length;
+  const summe = L.reduce((s, x) => s + ausSumme(x), 0);
+  const ohnePreis = L.filter(x => x.status === 'erneuert' && !(x.preis > 0)).length;
+  const tile = (l, v, d) => `<div class="tile"><div class="l">${l}</div><div class="v">${v}</div><div class="d">${d}</div></div>`;
+  const tiles = `<div class="tiles">
+    ${tile('Erneuert', `<span class="num">${zahl('erneuert')}</span>`, `von ${L.length} Positionen`)}
+    ${tile('Noch offen', `<span class="num">${zahl('offen')}</span>`, `${zahl('bestand')} Bestand · ${zahl('entfaellt')} entfällt`)}
+    ${tile('Materialwert', `<span class="num">${e0(summe)}</span>`, ohnePreis ? `${ohnePreis} erneuerte ohne Preis` : 'aller erneuerten Positionen')}
+    ${tile('Material je m²', `<span class="num">${p.wohnflaeche ? e0(summe / p.wohnflaeche) : '–'}</span>`, `bei ${m2(p.wohnflaeche)} Wohnfläche`)}
+  </div>`;
+  const andere = PROJEKTE.filter(q => q.id !== p.id && q.ausstattung && (q.ausstattung.positionen || []).some(x => x.produkt));
+  const cards = AUS_BEREICHE.map(([b, bn]) => {
+    const rows = L.filter(x => x.bereich === b);
+    if(!rows.length) return '';
+    const s = rows.reduce((t, x) => t + ausSumme(x), 0);
+    return `<div class="card au-card"><div class="card-head"><h2>${bn}</h2><span class="muted">${rows.filter(x => x.status === 'erneuert').length} erneuert${s ? ' · '+e0(s) : ''}</span></div>
+      <ul class="au-list">${rows.map(x => ausRow(p, x)).join('')}</ul></div>`;
+  }).join('');
+  return `${tiles}
+  <div class="au-bar">
+    <p class="muted" style="margin:0">Status antippen speichert sofort. ${p.ausstattung && p.ausstattung.stand ? 'Stand '+fd(p.ausstattung.stand)+'.' : ''}</p>
+    <div class="au-bar-r">${andere.length ? `<button class="btn ghost sm" type="button" data-act="aus-import" data-p="${p.id}">Aus anderem Projekt übernehmen</button>` : ''}<button class="btn ghost sm" type="button" data-act="aus-edit" data-p="${p.id}" data-k="">+ Position ergänzen</button></div>
+  </div>
+  ${cards}
+  <p class="hint">Der Materialwert ist ein Richtwert für die nächste Kalkulation. Er fließt nicht in die Gewinnermittlung, dort zählen nur die Rechnungen. Produkte könnt ihr auch im Claude-Chat schicken, als Link, Name oder Foto.</p>`;
+}
+
+function ausFehler(e){
+  return e.status === 401 || e.status === 403 ? 'Der GitHub-Schlüssel ist ungültig oder abgelaufen. Unter „Eckdaten bearbeiten“ entfernen und neu einrichten.'
+    : e.status === 404 ? 'Der Schlüssel hat keinen Zugriff auf das Repo Projektuebersicht.' : 'Speichern hat nicht geklappt: '+e.message;
+}
+function ausOhneSchluessel(p, txt){
+  openModal('Speichern einrichten', `<p>Damit die Seite die Ausstattung speichern kann, braucht dieses Gerät einmal den GitHub-Schlüssel. Es ist derselbe wie bei „Eckdaten bearbeiten“.</p>
+    <button class="btn" type="button" data-act="token-setup" data-p="${p.id}" data-next="aus">Jetzt einrichten</button>
+    <p>Oder diesen Text kopieren und im Claude-Chat einfügen:</p>
+    <textarea class="copybox" id="copytext" readonly style="min-height:110px">${esc(txt)}</textarea><button class="btn ghost" type="button" data-act="copy">Text kopieren</button>`);
+}
+/* Speichert eine Änderung. Status-Klicks laufen nacheinander, damit keiner verloren geht. */
+function ausSpeichern(pid, mut, lokal){
+  const p = PROJEKTE.find(x => x.id === pid);
+  if(lokal){ try { mut(p); } catch(e){ openModal('Nicht gespeichert', `<p>${esc(e.message)}</p>`); return Promise.resolve(null); } }
+  AUS_PENDING++; BZ_PENDING++; render(); toast('Speichere …');
+  const job = BZ_QUEUE.then(() => saveProject(pid, mut, 'Ausstattung aktualisiert'));
+  BZ_QUEUE = job.catch(() => {});
+  return job.then(neu => {
+    AUS_PENDING--; BZ_PENDING--;
+    const k = PROJEKTE.findIndex(y => y.id === neu.id); PROJEKTE[k] = neu;
+    if(!BZ_PENDING){ setFoot(); render(); toast('Gespeichert', 2200); }
+    return neu;
+  }).catch(async e => {
+    AUS_PENDING--; BZ_PENDING--;
+    document.getElementById('toast').hidden = true;
+    try { const frisch = await fetchJSON('daten/'+pid+'.enc'); const k = PROJEKTE.findIndex(y => y.id === pid); PROJEKTE[k] = frisch; } catch(x){}
+    render(); throw e;
+  });
+}
+function ausStatus(t){
+  const pid = t.dataset.p, key = t.dataset.k, v = t.dataset.v;
+  const p = PROJEKTE.find(x => x.id === pid); if(!p) return;
+  const x = ausListe(p).find(y => y.key === key); if(!x || x.status === v) return;
+  if(!ghToken()){ ausOhneSchluessel(p, `Ausstattung ${p.id} (${p.adresse}): ${x.name} auf „${AUS_STMAP[v]}“ setzen`); return; }
+  ausSpeichern(pid, o => { ausPos(o, key).status = v; o.ausstattung.stand = HEUTE(); }, true)
+    .catch(e => openModal('Nicht gespeichert', `<p>${esc(ausFehler(e))}</p>`));
+}
+
+function ausEdit(pid, key){
+  const p = PROJEKTE.find(x => x.id === pid);
+  const neu = !key, x = neu ? {status:'erneuert', einheit:'Stück', bereich:'sonstiges'} : ausListe(p).find(y => y.key === key);
+  if(!x) return;
+  const f = (id, label, val, extra, cls) => `<div class="fld ${cls||''}"><label for="a-${id}">${label}</label><div class="inp"><input id="a-${id}" ${extra||'type="text"'} value="${esc(val ?? '')}" autocomplete="off"></div></div>`;
+  const sel = (id, label, opts, val) => `<div class="fld"><label for="a-${id}">${label}</label><div class="inp"><select id="a-${id}">${opts.map(([v, l]) => `<option value="${v}" ${v === (val || '') ? 'selected' : ''}>${l}</option>`).join('')}</select></div></div>`;
+  const num = v => v == null || v === '' ? '' : nf(v);
+  const fotoFeld = ghToken() ? `<div class="fld au-full"><label for="a-foto">Foto</label>
+      ${x.foto && x.foto.id ? `<div class="au-fprev"><img data-foto="${p.id}/${x.foto.id}_t" alt="Aktuelles Foto"><label class="chk"><input type="checkbox" id="a-foto-weg"> Foto entfernen</label></div>` : ''}
+      <input id="a-foto" type="file" accept="image/*" class="au-file"><span class="fh">${x.foto ? 'Neues Foto ersetzt das alte.' : 'Produktfoto oder Foto vom verbauten Zustand.'}</span></div>`
+    : '<p class="hint au-full" style="margin:0">Fotos bitte im Claude-Chat schicken.</p>';
+  openModal(neu ? 'Position ergänzen' : x.name, `
+    <form id="aus-form" data-p="${p.id}" data-k="${esc(key || '')}" novalidate style="display:flex;flex-direction:column;gap:14px">
+      <div class="fields">
+        ${neu || !x.std ? f('name', 'Bezeichnung *', x.name) + sel('bereich', 'Bereich', AUS_BEREICHE, x.bereich) : ''}
+        ${sel('status', 'Status', AUS_STATUS, x.status)}
+        ${AUS_TEXT.map(([k, l]) => f(k, l, x[k], k === 'link' ? 'type="url" inputmode="url" placeholder="https://…"' : 'type="text"')).join('')}
+        ${f('preis', 'Preis je Einheit in € (brutto)', num(x.preis), 'type="text" inputmode="decimal"')}
+        <div class="au-2">${f('menge', 'Menge', num(x.menge), 'type="text" inputmode="decimal"')}${f('einheit', 'Einheit', x.einheit || 'Stück', 'type="text" list="au-einheiten"')}</div>
+        ${sel('bewertung', 'Bewertung', AUS_BEW, x.bewertung)}
+        ${f('alternative', 'Alternative fürs nächste Projekt', x.alternative)}
+        <div class="fld au-full"><label for="a-notiz">Notiz</label><div class="inp"><input id="a-notiz" type="text" value="${esc(x.notiz || '')}" autocomplete="off"></div></div>
+        ${fotoFeld}
+      </div>
+      <datalist id="au-einheiten"><option>Stück</option><option>m²</option><option>m</option><option>Set</option><option>Paket</option></datalist>
+      <div class="form-err" id="aus-err"></div>
+      <button class="btn" type="submit">${ghToken() ? 'Speichern' : 'Änderungen für Claude kopieren'}</button>
+      ${!neu && !x.std ? `<button class="linkbtn" type="button" data-act="aus-del" data-p="${p.id}" data-k="${esc(key)}" style="color:var(--bad)">Position löschen</button>` : ''}
+    </form>`, true);
+  hydrateFotos();
+}
+/* Bild verkleinern wie werkzeuge/daten.py: 1600 px und 480 px als JPEG */
+async function ausBild(file, kante, q){
+  const bmp = await createImageBitmap(file);
+  const s = Math.min(1, kante / Math.max(bmp.width, bmp.height));
+  const c = document.createElement('canvas'); c.width = Math.round(bmp.width * s); c.height = Math.round(bmp.height * s);
+  c.getContext('2d').drawImage(bmp, 0, 0, c.width, c.height);
+  const blob = await new Promise(r => c.toBlob(r, 'image/jpeg', q));
+  return new Uint8Array(await blob.arrayBuffer());
+}
+async function ausFotoHochladen(pid, file){
+  const fid = 'f' + [...crypto.getRandomValues(new Uint8Array(5))].map(b => b.toString(16).padStart(2, '0')).join('');
+  for(const [suffix, kante, q] of [['', 1600, .8], ['_t', 480, .72]]){
+    const enc = await encBytes(await ausBild(file, kante, q));
+    await gh(`contents/fotos/${pid}/${fid}${suffix}.enc`, {method:'PUT', body:JSON.stringify({message:'Foto Ausstattung', content:b64e(enc), branch:'main'})});
+  }
+  return fid;
+}
+async function ausSubmit(form){
+  const g = id => { const el = document.getElementById('a-'+id); return el ? el.value.trim() : ''; };
+  const err = document.getElementById('aus-err'), btn = form.querySelector('button[type="submit"]');
+  const pid = form.dataset.p, key = form.dataset.k, neu = !key;
+  const p = PROJEKTE.find(x => x.id === pid), alt = neu ? {} : ausListe(p).find(y => y.key === key);
+  const eigen = neu || !alt.std;
+  const preis = parseNum(g('preis')), menge = parseNum(g('menge'));
+  const fehler = [];
+  if(eigen && !g('name')) fehler.push('Bezeichnung fehlt.');
+  if(Number.isNaN(preis)) fehler.push('Beim Preis bitte eine Zahl eintragen.');
+  if(Number.isNaN(menge)) fehler.push('Bei der Menge bitte eine Zahl eintragen.');
+  if(fehler.length){ err.textContent = fehler.join(' '); return; }
+  const werte = {status: g('status'), preis, menge, einheit: g('einheit'), bewertung: g('bewertung'), alternative: g('alternative'), notiz: g('notiz')};
+  AUS_TEXT.forEach(([k]) => werte[k] = g(k));
+  if(eigen){ werte.name = g('name'); werte.bereich = g('bereich'); }
+  if(!ghToken()){
+    const zeilen = [];
+    const zeig = (k, v) => k === 'status' ? AUS_STMAP[v] : k === 'bewertung' ? (AUS_BEW.find(b => b[0] === v) || ['', ''])[1] : (typeof v === 'number' ? nf(v) : v);
+    const labels = {name:'Bezeichnung', bereich:'Bereich', status:'Status', preis:'Preis je Einheit €', menge:'Menge', einheit:'Einheit', bewertung:'Bewertung', alternative:'Alternative', notiz:'Notiz', ...Object.fromEntries(AUS_TEXT)};
+    Object.entries(werte).forEach(([k, v]) => { const a = alt[k] ?? '', b = v ?? ''; if(String(a) !== String(b)) zeilen.push(`${labels[k]}: ${a === '' ? 'leer' : zeig(k, a)} → ${b === '' ? 'leer' : zeig(k, b)}`); });
+    if(!zeilen.length){ err.textContent = 'Es wurde nichts geändert.'; return; }
+    const txt = `Ausstattung in der Projektübersicht ${neu ? 'ergänzen' : 'ändern'}, Projekt ${p.id} (${p.adresse}), Position „${neu ? werte.name : alt.name}“:\n` + zeilen.map(z => '- '+z).join('\n');
+    ausOhneSchluessel(p, txt); return;
+  }
+  btn.disabled = true; btn.textContent = 'Speichere …'; err.textContent = '';
+  try {
+    const datei = document.getElementById('a-foto') && document.getElementById('a-foto').files[0];
+    let fid = null;
+    if(datei){ btn.textContent = 'Lade Foto hoch …'; fid = await ausFotoHochladen(pid, datei); }
+    const weg = document.getElementById('a-foto-weg') && document.getElementById('a-foto-weg').checked;
+    const k = neu ? 'x-' + slug(werte.name).slice(0, 30) + '-' + Date.now().toString(36) : key;
+    await ausSpeichern(pid, o => {
+      let x;
+      if(neu){ o.ausstattung = o.ausstattung || {positionen:[]}; o.ausstattung.positionen = o.ausstattung.positionen || []; x = {key:k}; o.ausstattung.positionen.push(x); }
+      else x = ausPos(o, k);
+      Object.entries(werte).forEach(([f, v]) => { if(v === '' || v == null) delete x[f]; else x[f] = v; });
+      if(!x.status) x.status = 'offen';
+      if(fid) x.foto = {id: fid}; else if(weg) delete x.foto;
+      o.ausstattung.stand = HEUTE();
+    }, false);
+    document.getElementById('modal').classList.remove('open');
+  } catch(e){ btn.disabled = false; btn.textContent = 'Speichern'; err.textContent = ausFehler(e); }
+}
+document.addEventListener('submit', e => { if(e.target.id === 'aus-form'){ e.preventDefault(); ausSubmit(e.target); } });
+
+function ausDel(pid, key){
+  const p = PROJEKTE.find(x => x.id === pid), x = ausListe(p).find(y => y.key === key);
+  if(!x || !confirm(`„${x.name}“ löschen?`)) return;
+  document.getElementById('modal').classList.remove('open');
+  ausSpeichern(pid, o => { o.ausstattung.positionen = (o.ausstattung.positionen || []).filter(y => y.key !== key); o.ausstattung.stand = HEUTE(); }, false)
+    .catch(e => openModal('Nicht gespeichert', `<p>${esc(ausFehler(e))}</p>`));
+}
+/* Produkte aus einem früheren Projekt als Vorschlag übernehmen. Status bleibt offen, Menge und Fotos nicht. */
+function ausImportVorschau(ziel, quelle){
+  const L = ausListe(ziel), Q = ausListe(quelle).filter(x => x.produkt);
+  return Q.map(q => {
+    const t = L.find(y => y.key === q.key);
+    if(t && t.produkt) return null;
+    return {q, ersetzen: q.bewertung === 'ersetzen'};
+  }).filter(Boolean);
+}
+function ausImport(pid){
+  const p = PROJEKTE.find(x => x.id === pid);
+  const andere = PROJEKTE.filter(q => q.id !== pid && q.ausstattung && (q.ausstattung.positionen || []).some(x => x.produkt));
+  if(!ghToken()){ ausOhneSchluessel(p, `Ausstattung ${p.id} (${p.adresse}): Produkte aus Projekt ${andere.map(q => q.nr).join(' oder ')} übernehmen`); return; }
+  openModal('Aus anderem Projekt übernehmen', `<p>Übernimmt Produktname, Hersteller, Link, Artikelnummer, Farbe, Händler und Preis in alle Positionen, die hier noch leer sind. Der Status bleibt „Offen“. Menge und Fotos werden nicht übernommen. Steht beim alten Projekt „Ersetzen“, kommt nur ein Hinweis in die Notiz.</p>
+    <div class="fld"><label for="a-quelle">Projekt</label><div class="inp"><select id="a-quelle">${andere.map(q => `<option value="${q.id}">${q.nr} · ${esc(q.adresse)}</option>`).join('')}</select></div></div>
+    <p class="muted" id="a-vorschau" style="margin:0"></p>
+    <div class="form-err" id="aus-err"></div>
+    <button class="btn" type="button" data-act="aus-import-go" data-p="${pid}">Übernehmen</button>`);
+  ausImportZaehlen(pid);
+}
+function ausImportZaehlen(pid){
+  const p = PROJEKTE.find(x => x.id === pid), q = PROJEKTE.find(x => x.id === document.getElementById('a-quelle').value);
+  const v = ausImportVorschau(p, q);
+  document.getElementById('a-vorschau').textContent = v.length ? `${v.filter(x => !x.ersetzen).length} Produkte zum Übernehmen, ${v.filter(x => x.ersetzen).length} Hinweise zum Ersetzen.` : 'Alle Positionen sind hier schon ausgefüllt.';
+}
+function ausImportGo(t){
+  const pid = t.dataset.p, qid = document.getElementById('a-quelle').value;
+  const q = PROJEKTE.find(x => x.id === qid);
+  const v = ausImportVorschau(PROJEKTE.find(x => x.id === pid), q);
+  if(!v.length) return;
+  t.disabled = true; t.textContent = 'Speichere …';
+  ausSpeichern(pid, o => {
+    v.forEach(({q: s, ersetzen}) => {
+      let x;
+      if(AUS_STANDARD.some(y => y.key === s.key)) x = ausPos(o, s.key);
+      else { x = o.ausstattung.positionen.find(y => y.key === s.key); if(!x){ x = {key:s.key, name:s.name, bereich:s.bereich, status:'offen'}; o.ausstattung.positionen.push(x); } }
+      if(x.produkt) return;
+      if(ersetzen){ const h = `Projekt ${q.nr}: ${[s.hersteller, s.produkt].filter(Boolean).join(' ')} ersetzen${s.alternative ? ', Alternative '+s.alternative : ''}.`; x.notiz = x.notiz ? x.notiz+' '+h : h; return; }
+      AUS_COPY.forEach(f => { if(s[f] != null && s[f] !== '') x[f] = s[f]; });
+      x.herkunft = q.id;
+    });
+    o.ausstattung.stand = HEUTE();
+  }, false).then(() => openModal('Übernommen', '<p>Die Produkte sind eingetragen. Jetzt je Position den Status setzen und die Menge ergänzen.</p>'))
+    .catch(e => { t.disabled = false; t.textContent = 'Übernehmen'; document.getElementById('aus-err').textContent = ausFehler(e); });
+}
+document.addEventListener('change', e => { if(e.target.id === 'a-quelle') ausImportZaehlen(e.target.closest('.modal-box').querySelector('[data-act="aus-import-go"]').dataset.p); });
+
 /* ============ Routing und Interaktion ============ */
 function parseRoute(){
   const h = decodeURIComponent(location.hash.slice(1));
@@ -1679,6 +1991,16 @@ document.addEventListener('click', e=>{
   else if(a==='lb-next'){ LB.i = (LB.i+1)%LB.fotos.length; showLb(); }
   else if(a==='edit'){ editDialog(PROJEKTE.find(x => x.id === t.dataset.p)); }
   else if(a==='plan-edit'){ openPlanEdit(t.dataset.p); }
+  else if(a==='aus-status'){ ausStatus(t); }
+  else if(a==='aus-edit'){ ausEdit(t.dataset.p, t.dataset.k); }
+  else if(a==='aus-del'){ ausDel(t.dataset.p, t.dataset.k); }
+  else if(a==='aus-import'){ ausImport(t.dataset.p); }
+  else if(a==='aus-import-go'){ ausImportGo(t); }
+  else if(a==='aus-foto'){
+    const p = PROJEKTE.find(x=>x.id===t.dataset.p), x = ausListe(p).find(y=>y.key===t.dataset.k);
+    LB = {fotos:[{cap:[x.name, x.hersteller, x.produkt].filter(Boolean).join(', '), key:p.id+'/'+x.foto.id}], i:0};
+    showLb(); document.getElementById('lb').classList.add('open');
+  }
   else if(a==='pe-add-g'){ document.getElementById('pe-g').insertAdjacentHTML('beforeend', peGewerk(null)); peNummern(); const r = document.querySelector('#pe-g .pe-g:last-child'); r.scrollIntoView({block:'nearest'}); r.querySelector('.peg-name').focus(); }
   else if(a==='pe-add-m'){ document.getElementById('pe-m').insertAdjacentHTML('beforeend', peMeilenstein(null)); const r = document.querySelector('#pe-m .pe-m:last-child'); r.scrollIntoView({block:'nearest'}); r.querySelector('.pem-name').focus(); }
   else if(a==='pe-del'){ const r = t.closest('.pe-row'); const n = (r.querySelector('.peg-name, .pem-name') || {}).value; if(!n || confirm(`„${n}“ löschen?`)){ r.remove(); peNummern(); } }
@@ -1695,6 +2017,7 @@ document.addEventListener('click', e=>{
       if(!r.permissions || !r.permissions.push) throw Object.assign(new Error('keine Schreibrechte'), {status:403});
       if(t.dataset.next === 'bau'){ openModal('Eingerichtet', '<p>Der Schlüssel ist gespeichert. Ab jetzt reicht ein Tipp aufs Kästchen.</p>'); render(); }
       else if(t.dataset.next === 'plan'){ openPlanEdit(t.dataset.p); }
+      else if(t.dataset.next === 'aus'){ openModal('Eingerichtet', '<p>Der Schlüssel ist gespeichert. Ab jetzt speichert die Ausstattung direkt.</p>'); render(); }
       else editDialog(PROJEKTE.find(x => x.id === t.dataset.p));
     }).catch(x => { ls.del('rh-gh-token'); t.disabled = false; t.textContent = 'Schlüssel speichern';
       err.textContent = x.status === 401 ? `GitHub lehnt den Schlüssel ab (${esc(x.gh || 'Bad credentials')}). Eingefügt: ${v.length} Zeichen. Meist war der Schlüssel unvollständig kopiert. Bitte auf GitHub neu erzeugen und mit dem Kopier-Symbol neben dem Schlüssel kopieren.` : x.status === 404 ? 'Kein Zugriff auf das Repo Projektuebersicht.' : x.status === 403 ? 'Der Schlüssel hat keine Schreibrechte (Contents: Read and write).' : 'Prüfung fehlgeschlagen: '+x.message; });
