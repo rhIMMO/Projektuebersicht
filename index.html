@@ -437,7 +437,7 @@ a.addcard:hover{border-color:var(--accent)}
 .au-seg button{padding:5px 9px;font-size:12.5px}
 .au-row.st-erneuert .au-seg button[aria-pressed="true"]{background:var(--good-soft);color:var(--good)}
 .au-row.st-offen .au-seg button[aria-pressed="true"]{background:var(--accent-soft);color:var(--accent)}
-.au-row.st-entfaellt .au-nm,.au-row.st-bestand .au-nm{color:var(--ink-2)}
+.au-row.st-entfaellt .au-nm{color:var(--ink-2)}
 .au-foto{width:56px;height:56px;border:0;padding:0;border-radius:8px;overflow:hidden;background:var(--surface-2);cursor:zoom-in}
 .au-foto img{width:100%;height:100%;object-fit:cover;display:block}
 .au-full{grid-column:1 / -1}
@@ -1654,15 +1654,15 @@ window.addEventListener('beforeunload', e => { if(BZ_PENDING){ e.preventDefault(
 /* ============ Ausstattung: verbaute Produkte je Projekt ============ */
 const AUS_BEREICHE = [['boden','Boden'],['tueren','Türen'],['bad','Bad'],['elektro','Elektro und Licht'],['heizung','Heizung und Fenster'],['sonstiges','Sonstiges']];
 const AUS_STANDARD = [
-  ['parkett','boden','Parkett / Vinyl','m²'], ['sockel','boden','Sockelleisten','m'], ['fliesen','boden','Fliesen','m²'],
+  ['parkett','boden','Parkett / Vinyl','m²'], ['fliesen','boden','Fliesen','m²'],
   ['tueren','tueren','Innentüren mit Zarge','Stück'], ['druecker','tueren','Türdrücker','Stück'],
   ['waschtisch','bad','Waschtisch','Stück'], ['wt-unterschrank','bad','Waschtischunterschrank','Stück'], ['wt-armatur','bad','Waschtischarmatur','Stück'],
   ['spiegel','bad','LED-Spiegel','Stück'], ['wc','bad','WC','Stück'], ['dusch-armatur','bad','Duscharmatur','Stück'],
-  ['duschabtrennung','bad','Duschabtrennung','Stück'], ['handtuchheizkoerper','bad','Handtuchheizkörper','Stück'], ['bad-acc','bad','Badaccessoires','Set'],
+  ['duschabtrennung','bad','Duschabtrennung','Stück'], ['handtuchheizkoerper','bad','Handtuchheizkörper','Stück'],
   ['schalter','elektro','Steckdosen und Schalter (Serie)','Stück'], ['spots','elektro','Spots','Stück'], ['deckenleuchten','elektro','Deckenleuchten','Stück'],
   ['heizkoerper','heizung','Heizkörper','Stück'], ['fenster','heizung','Fenster','Stück'], ['fensterbaenke','heizung','Fensterbänke','Stück'],
 ].map(([key, bereich, name, einheit]) => ({key, bereich, name, einheit}));
-const AUS_STATUS = [['offen','Offen'],['erneuert','Erneuert'],['bestand','Bestand'],['entfaellt','Entfällt']];
+const AUS_STATUS = [['offen','Offen'],['erneuert','Erneuert'],['entfaellt','Entfällt']];
 const AUS_STMAP = Object.fromEntries(AUS_STATUS);
 const AUS_BEW = [['','Keine Angabe'],['wieder','Wieder nehmen'],['ersetzen','Nächstes Mal ersetzen']];
 const AUS_TEXT = [['produkt','Produktname'],['hersteller','Hersteller'],['link','Link'],['artikelnr','Artikelnummer'],['farbe','Farbe oder Oberfläche'],['haendler','Händler']];
@@ -1674,7 +1674,9 @@ function ausListe(p){
   const byKey = new Map(gesp.map(x => [x.key, x]));
   const std = AUS_STANDARD.map(s => ({...s, status:'offen', ...(byKey.get(s.key) || {}), std:true}));
   const eigene = gesp.filter(x => !AUS_STANDARD.some(s => s.key === x.key)).map(x => ({status:'offen', ...x, bereich: AUS_BEREICHE.some(b => b[0] === x.bereich) ? x.bereich : 'sonstiges'}));
-  return [...std, ...eigene];
+  const alle = [...std, ...eigene];
+  alle.forEach(x => { if(!AUS_STMAP[x.status]) x.status = 'offen'; });
+  return alle;
 }
 /* Position im gespeicherten Objekt holen. Standardpositionen werden beim ersten Speichern angelegt. */
 function ausPos(o, key){
@@ -1725,7 +1727,7 @@ function renderAusstattung(p){
   const tile = (l, v, d) => `<div class="tile"><div class="l">${l}</div><div class="v">${v}</div><div class="d">${d}</div></div>`;
   const tiles = `<div class="tiles">
     ${tile('Erneuert', `<span class="num">${zahl('erneuert')}</span>`, `von ${L.length} Positionen`)}
-    ${tile('Noch offen', `<span class="num">${zahl('offen')}</span>`, `${zahl('bestand')} Bestand · ${zahl('entfaellt')} entfällt`)}
+    ${tile('Noch offen', `<span class="num">${zahl('offen')}</span>`, `${zahl('entfaellt')} entfallen`)}
     ${tile('Materialwert', `<span class="num">${e0(summe)}</span>`, ohnePreis ? `${ohnePreis} erneuerte ohne Preis` : 'aller erneuerten Positionen')}
     ${tile('Material je m²', `<span class="num">${p.wohnflaeche ? e0(summe / p.wohnflaeche) : '–'}</span>`, `bei ${m2(p.wohnflaeche)} Wohnfläche`)}
   </div>`;

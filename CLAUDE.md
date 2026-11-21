@@ -125,7 +125,7 @@ Tab „Bauzeitenplan“ je Projekt und „Bauzeiten im Überblick“ auf der Sta
 
 Tab „Ausstattung“ je Projekt. Hält fest, welche Produkte verbaut wurden, damit die Nutzer beim nächsten Projekt wissen, was sie genommen haben und was sie wieder nehmen wollen. Hilft bei der Kalkulation.
 
-- Standardliste steht in `index.html` (`AUS_STANDARD`) und gilt für jedes Projekt: Boden (Parkett / Vinyl, Sockelleisten, Fliesen), Türen (Innentüren mit Zarge, Türdrücker), Bad (Waschtisch, Waschtischunterschrank, Waschtischarmatur, LED-Spiegel, WC, Duscharmatur, Duschabtrennung, Handtuchheizkörper, Badaccessoires), Elektro und Licht (Steckdosen und Schalter, Spots, Deckenleuchten), Heizung und Fenster (Heizkörper, Fenster, Fensterbänke). Die Liste nur auf Wunsch der Nutzer ändern.
+- Standardliste steht in `index.html` (`AUS_STANDARD`) und gilt für jedes Projekt: Boden (Parkett / Vinyl, Fliesen), Türen (Innentüren mit Zarge, Türdrücker), Bad (Waschtisch, Waschtischunterschrank, Waschtischarmatur, LED-Spiegel, WC, Duscharmatur, Duschabtrennung, Handtuchheizkörper), Elektro und Licht (Steckdosen und Schalter, Spots, Deckenleuchten), Heizung und Fenster (Heizkörper, Fenster, Fensterbänke). Die Liste nur auf Wunsch der Nutzer ändern.
 - Daten im Projekt unter `ausstattung`. Fehlt es, zeigt die Seite die Standardliste mit Status „Offen“. Gespeichert werden nur Positionen, die jemand angefasst hat.
 
 ```json
@@ -137,7 +137,7 @@ Tab „Ausstattung“ je Projekt. Hält fest, welche Produkte verbaut wurden, da
 }
 ```
 
-- `status`: offen, erneuert, bestand, entfaellt. `bewertung`: wieder, ersetzen oder leer. Leere Felder weglassen. `preis` ist brutto je Einheit.
+- `status`: offen (Startwert, alles was nicht erneuert ist), erneuert, entfaellt. `bewertung`: wieder, ersetzen oder leer. Leere Felder weglassen. `preis` ist brutto je Einheit.
 - Standardpositionen behalten ihren `key` aus `AUS_STANDARD`. Eigene Positionen bekommen einen Schlüssel mit `x-` am Anfang und einen `bereich` (boden, tueren, bad, elektro, heizung, sonstiges).
 - Fotos mit `werkzeuge/daten.py foto pXX <bild>` einbinden und als `foto: {"id":"f…"}` an die Position schreiben.
 - Die Seite speichert selbst (GitHub-Schlüssel, Commit „Ausstattung aktualisiert“): Status antippen, „Bearbeiten“ mit Foto-Upload, „+ Position ergänzen“, „Aus anderem Projekt übernehmen“. Ohne Schlüssel erzeugt sie einen Text „Ausstattung in der Projektübersicht ändern, Projekt pXX …“. Den genau so übernehmen.
