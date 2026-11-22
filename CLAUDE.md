@@ -156,7 +156,9 @@ Foto mit `werkzeuge/daten.py foto pXX <bild>` einbinden und als `titelbild: {"id
 
 - Gewinn vor Steuern = Verkaufspreis minus Summe der fünf Kategorien.
 - Marge = Gewinn vor Steuern geteilt durch Summe Kosten.
-- EK-Rendite = Gewinn vor Steuern geteilt durch Eigenkapital, p.a. linear hochgerechnet.
+- EK-Rendite aufs Projekt = Gewinn vor Steuern geteilt durch Eigenkapital.
+- EK-Rendite p.a. = EK-Rendite aufs Projekt mal 12 geteilt durch die tatsächliche Laufzeit in Monaten (Plan: `plan.dauerMonate`). Sie ist die Hauptzahl auf Projektkarte, Gewinnermittlung und Abschlussbericht. Laufende Projekte zeigen die erwartete Rendite laut Plan.
+- EK-Rendite über alle Projekte (Startseite, Funktion `ekPortfolio`): nur verkaufte Projekte. p.a. = Summe Gewinne geteilt durch Summe aus Eigenkapital mal Laufzeit in Jahren. Großes Kapital zählt stärker, schnelle Projekte schneiden besser ab. Daneben die erwartete Rendite der laufenden Projekte laut Plan.
 - Projektdauer = Beurkundung Ankauf bis Beurkundung Verkauf.
 - Plan-Verkaufspreis = Szenario goldene Mitte aus der Excel.
 

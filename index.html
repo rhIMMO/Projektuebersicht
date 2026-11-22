@@ -80,11 +80,14 @@ main{max-width:1120px;margin:0 auto;padding:18px 16px 72px}
 
 /* Startseite */
 .eyebrow{font-size:13px;color:var(--ink-2);margin-bottom:6px}
-.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;margin:22px 0 34px}
+.stats{display:grid;grid-template-columns:repeat(5,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;margin:22px 0 34px}
 .stat{background:var(--surface);padding:16px 18px}
 .stat .l{font-size:13px;color:var(--ink-2)}
 .stat .v{font-size:26px;font-weight:600;letter-spacing:-.015em;margin-top:2px}
+@media (max-width:1000px){.stats{grid-template-columns:repeat(4,1fr)}.stat.ekstat{grid-column:1 / -1}}
 @media (max-width:760px){.stats{grid-template-columns:1fr 1fr}.stat .v{font-size:22px}}
+.stat .d{font-size:12.5px;color:var(--muted);margin-top:2px}
+.stat.ekstat .v{color:var(--accent)}
 .section-h{display:flex;align-items:baseline;gap:10px;margin:0 0 12px}
 .section-h .count{color:var(--muted);font-size:14px}
 .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:16px;margin-bottom:36px}
@@ -740,7 +743,8 @@ function renderStart(){
   const done = rows.filter(r=>r.p.status==='abgeschlossen');
   const realisiert = done.reduce((s,r)=>s+r.c.gewinn,0);
   const umsatz = done.reduce((s,r)=>s+r.p.verkauf.preis,0);
-  const stat = (l,v) => `<div class="stat"><div class="l">${l}</div><div class="v">${v}</div></div>`;
+  const pf = ekPortfolio(rows);
+  const stat = (l,v,d,cls) => `<div class="stat ${cls||''}"><div class="l">${l}</div><div class="v">${v}</div>${d?`<div class="d">${d}</div>`:''}</div>`;
   return `
   <div class="eyebrow">Rehrmann &amp; Harms Immobilien</div>
   <h1>Fix &amp; Flip Projekte</h1>
@@ -749,6 +753,9 @@ function renderStart(){
     ${stat('Abgeschlossene Projekte', done.length)}
     ${stat('Realisierter Gewinn vor Steuern', e0(realisiert))}
     ${stat('Gesamtumsatz aus Verkäufen', e0(umsatz))}
+    ${stat('EK-Rendite p.a., alle Verkäufe', pf.n ? pc(pf.pa,1) : '–',
+      (pf.n ? `${pc(pf.gesamt,1)} auf ${e0(pf.ek)} Eigenkapital aus ${pf.n} ${pf.n===1?'Verkauf':'Verkäufen'}` : 'steht nach dem ersten Verkauf fest')
+      + (pf.nPlan ? ` · laufend erwartet ${pc(pf.planPa,1)} p.a.` : ''), 'ekstat')}
   </div>
   ${renderBauPortfolio(lauf)}
   <div class="section-h"><h2>Laufend</h2><span class="count">${lauf.length}</span></div>
@@ -771,13 +778,22 @@ function bauZeile(p){
   const b = bauCalc(bp);
   return `<div><div class="mrow"><span>Baufortschritt${bp.beispiel?' (Beispiel)':''}</span><span class="num">${pc(b.ist,0)}</span></div><div class="meter"><span style="width:${b.ist*100}%"></span></div><div class="bz-line" style="margin-top:6px"><span>${b.aktuell.length?esc(b.aktuell[0].name)+(b.aktuell.length>1?' und weitere':''):esc(b.ruhe)}</span>${bzState(b)}</div></div>`;
 }
+/* EK-Rendite über alle Projekte: Gewinne geteilt durch Eigenkapital mal gebundene Zeit.
+   So zählt großes Kapital stärker und ein schnelles Projekt besser als ein langsames. */
+function ekPortfolio(rows){
+  const done = rows.filter(r => r.p.status === 'abgeschlossen' && r.c.ek0 > 0 && r.c.dauer > 0);
+  const lauf = rows.filter(r => r.p.status !== 'abgeschlossen' && r.c.ek0 > 0 && r.p.plan.dauerMonate > 0);
+  const g = done.reduce((s,r)=>s+r.c.gewinn,0), ek = done.reduce((s,r)=>s+r.c.ek0,0), ekJ = done.reduce((s,r)=>s+r.c.ek0*r.c.dauer/12,0);
+  const pg = lauf.reduce((s,r)=>s+r.c.planGewinn,0), pekJ = lauf.reduce((s,r)=>s+r.c.ek0*r.p.plan.dauerMonate/12,0);
+  return {n: done.length, gewinn: g, ek, gesamt: ek ? g/ek : 0, pa: ekJ ? g/ekJ : 0, nPlan: lauf.length, planPa: pekJ ? pg/pekJ : 0};
+}
 function card({p,c}){
   const done = p.status==='abgeschlossen';
   const cov = coverFoto(p);
   const last = p.timeline.map(t=>t.datum).sort().pop();
   const kv = done
-    ? [['Verkaufspreis', e0(p.verkauf.preis)], ['Gewinn vor Steuern', e0(c.gewinn)], ['Marge', pc(c.marge)], ['Projektdauer', mo(c.dauer)]]
-    : [['Kosten bisher', e0(c.istSum)], ['Plan gesamt', e0(c.planSum)], ['Erwarteter Gewinn', e0(c.planGewinn)], ['Seit Ankauf', mo(c.dauer)]];
+    ? [['Verkaufspreis', e0(p.verkauf.preis)], ['Gewinn vor Steuern', e0(c.gewinn)], ['Marge', pc(c.marge)], ['EK-Rendite p.a.', pc(c.ekPa)], ['Projektdauer', mo(c.dauer)], ['Eigenkapital', e0(c.ek0)]]
+    : [['Kosten bisher', e0(c.istSum)], ['Plan gesamt', e0(c.planSum)], ['Erwarteter Gewinn', e0(c.planGewinn)], ['Erwartete EK-Rendite p.a.', pc(c.planEkPa)], ['Seit Ankauf', mo(c.dauer)], ['Eigenkapital', e0(c.ek0)]];
   const share = c.istSum/c.planSum;
   return `<a class="pcard" href="#${p.id}--kosten">
     <div class="pcard-img">${cov ? `<img data-foto="${cov.key}" alt="${esc(cov.f.cap)}">` : '<div class="ph-empty">Noch keine Fotos</div>'}${statusPill(p)}</div>
@@ -1080,12 +1096,12 @@ function renderGewinn(p,c){
   const tiles = done ? [
       tile('Gewinn vor Steuern', e0(c.gewinn), `Plan ${e0(c.planGewinn)} · ${dl(c.gewinn-c.planGewinn,true)}`),
       tile('Marge auf Gesamtkosten', pc(c.marge), `Plan ${pc(c.planMarge)}`),
-      tile('Eigenkapitalrendite', pc(c.ek,0), `${pc(c.ekPa,0)} p.a. · EK ${e0(c.ek0)}`),
+      tile('EK-Rendite p.a.', pc(c.ekPa), `${pc(c.ek)} in ${mo(c.dauer)} · Plan ${pc(c.planEkPa)} p.a.`),
       tile('Projektdauer', mo(c.dauer), `Plan ${mo(p.plan.dauerMonate)}`),
     ] : [
       tile('Erwarteter Gewinn vor Steuern', e0(c.planGewinn), 'Szenario goldene Mitte'),
       tile('Erwartete Marge', pc(c.planMarge), 'auf Gesamtkosten'),
-      tile('Erwartete EK-Rendite', pc(c.planEk,0), `${pc(c.planEkPa,0)} p.a. · EK ${e0(c.ek0)}${c.ekAuto?' (berechnet)':''}`),
+      tile('Erwartete EK-Rendite p.a.', pc(c.planEkPa), `${pc(c.planEk)} in ${mo(p.plan.dauerMonate)} · EK ${e0(c.ek0)}${c.ekAuto?' (berechnet)':''}`),
       tile('Laufzeit seit Ankauf', mo(c.dauer), `Plan ${mo(p.plan.dauerMonate)}`),
     ];
 
@@ -1109,7 +1125,9 @@ function renderGewinn(p,c){
   rows += `<tr class="sum"><td>Summe Kosten</td><td>${e0(c.planSum)}</td><td>${e0(c.istSum)}${dvm(done?dl(c.istSum-c.planSum,false):e0(c.planSum-c.istSum))}</td><td>${done?dl(c.istSum-c.planSum,false):e0(c.planSum-c.istSum)}</td></tr>`;
   rows += `<tr class="res"><td>Gewinn vor Steuern</td><td>${e0(c.planGewinn)}</td><td>${done?e0(c.gewinn)+dvm(dl(c.gewinn-c.planGewinn,true)):'nach Verkauf'}</td><td>${done?dl(c.gewinn-c.planGewinn,true):''}</td></tr>`;
   rows += `<tr class="kpi"><td>Marge auf Gesamtkosten</td><td>${pc(c.planMarge)}</td><td>${done?pc(c.marge):''}</td><td></td></tr>`;
-  rows += `<tr class="kpi"><td><span class="nm-l">Eigenkapitalrendite</span><span class="nm-s">EK-Rendite</span></td><td>${pc(c.planEk)}</td><td>${done?pc(c.ek):''}</td><td></td></tr>`;
+  rows += `<tr class="kpi"><td><span class="nm-l">Eigenkapitalrendite aufs Projekt</span><span class="nm-s">EK-Rendite</span></td><td>${pc(c.planEk)}</td><td>${done?pc(c.ek):''}</td><td></td></tr>`;
+  rows += `<tr class="kpi"><td><span class="nm-l">Eigenkapitalrendite p.a.</span><span class="nm-s">EK-Rendite p.a.</span></td><td>${pc(c.planEkPa)}</td><td>${done?pc(c.ekPa):''}</td><td></td></tr>`;
+  rows += `<tr class="sub"><td>Laufzeit</td><td>${mo(p.plan.dauerMonate)}</td><td>${done?mo(c.dauer):''}</td><td></td></tr>`;
 
   const sz = c.szen;
   const szen = `<div class="card" style="margin-top:16px">
@@ -1123,7 +1141,7 @@ function renderGewinn(p,c){
     <div class="tablewrap"><table class="gw"><thead><tr>${head.map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>${rows}</tbody></table></div>
   </div>
   ${szen}
-  <p class="foot">Gewinn vor Steuern = Verkaufspreis minus Kaufpreis, Kaufnebenkosten, Finanzierungskosten, Renovierungskosten und weitere Kosten. Finanzierungskosten sind Zinsen und Bearbeitungsgebühr, ohne Tilgung. Marge = Gewinn vor Steuern geteilt durch Summe Kosten. EK-Rendite = Gewinn vor Steuern geteilt durch eingesetztes Eigenkapital, p.a. linear auf 12 Monate hochgerechnet${c.ekText?' (Eigenkapital: '+c.ekText+')':''}. Projektdauer = Beurkundung Ankauf bis Beurkundung Verkauf. Alle Beträge brutto.</p>`;
+  <p class="foot">Gewinn vor Steuern = Verkaufspreis minus Kaufpreis, Kaufnebenkosten, Finanzierungskosten, Renovierungskosten und weitere Kosten. Finanzierungskosten sind Zinsen und Bearbeitungsgebühr, ohne Tilgung. Marge = Gewinn vor Steuern geteilt durch Summe Kosten. EK-Rendite aufs Projekt = Gewinn vor Steuern geteilt durch eingesetztes Eigenkapital. EK-Rendite p.a. = diese Rendite geteilt durch die tatsächliche Laufzeit in Monaten mal 12. Ein schnelleres Projekt hat bei gleichem Gewinn also die höhere Rendite p.a.${c.ekText?' (Eigenkapital: '+c.ekText+')':''}. Projektdauer = Beurkundung Ankauf bis Beurkundung Verkauf. Alle Beträge brutto.</p>`;
 }
 
 function renderBericht(p,c){
@@ -1159,6 +1177,7 @@ function renderBericht(p,c){
       <div class="sh-kpis">
         <div class="sh-kpi big"><div class="l">Gewinn vor Steuern</div><div class="v">${e0(c.gewinn)}</div></div>
         <div class="sh-kpi"><div class="l">Marge auf Gesamtkosten</div><div class="v">${pc(c.marge)}</div></div>
+        <div class="sh-kpi"><div class="l">EK-Rendite p.a.</div><div class="v">${pc(c.ekPa)}</div></div>
         <div class="sh-kpi"><div class="l">Projektdauer</div><div class="v">${mo(c.dauer)}</div></div>
       </div>
     </div>
